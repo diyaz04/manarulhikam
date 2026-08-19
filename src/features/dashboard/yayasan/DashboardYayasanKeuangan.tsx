@@ -5,12 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { CloudinaryUpload } from "@/components/common/CloudinaryUpload";
-import { Loader2, Plus, Pencil, Trash2, X, Save, TrendingUp, TrendingDown, Download, Eye } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, Save, TrendingUp, TrendingDown, Download, Eye } from "lucide-react";
 import * as XLSX from "xlsx";
 
 interface Kategori {

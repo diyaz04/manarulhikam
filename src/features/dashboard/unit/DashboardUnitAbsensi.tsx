@@ -66,7 +66,7 @@ export function DashboardUnitAbsensi() {
 
       if (error) throw error;
 
-      const validAgendas = (agendaData || []).filter(a => a.jadwal != null && a.jadwal.academic_year_id === yearData.id);
+      const validAgendas = (agendaData || []).filter((a: any) => a.jadwal != null && a.jadwal.academic_year_id === yearData.id);
       setAgendas(validAgendas);
 
     } catch (err) {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -6,7 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, ReceiptText, UploadCloud, History, FileCheck, Search, Building2, CheckCircle2 } from "lucide-react";
+import { Loader2, ReceiptText, UploadCloud, History, Search, Building2, CheckCircle2 } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface Student { id: string; nama: string; nisn: string; nik: string; lembaga: { nama: string } }
@@ -152,7 +152,7 @@ export function PortalSiswaIndex() {
         alert("Pembayaran berhasil disubmit dan menunggu verifikasi Bendahara!");
         setIsPayModalOpen(false);
         setSelectedBillIds([]);
-        if (student) fetchData(student.id);
+        if (student) fetchData([student.id]);
       }
     } catch (err: any) {
       alert("Gagal mensubmit pembayaran: " + err.message);

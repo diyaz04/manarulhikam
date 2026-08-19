@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { Loader2, ArrowLeft, Upload, FileText, CheckCircle2, Download, XCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -9,7 +9,6 @@ import { Label } from "@/components/ui/label";
 
 export function PublicSpmb() {
   const { lembagaCode } = useParams<{ lembagaCode: string }>();
-  const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
   const [config, setConfig] = useState<any>(null);

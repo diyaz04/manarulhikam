@@ -19,8 +19,6 @@ import {
   LogOut,
   Menu,
   X,
-  ChevronDown,
-  Building,
   Home,
   School,
   MapPin,
@@ -35,8 +33,7 @@ import {
   UserCheck,
   GraduationCap,
   Edit3,
-  UserCircle,
-  Camera
+  UserCircle
 } from "lucide-react";
 
 export function DashboardLayout() {
@@ -57,11 +54,11 @@ export function DashboardLayout() {
 
   // Fetch Logo
   useEffect(() => {
-    if (activeRole?.lembaga.id) {
+    if (activeRole?.lembaga_id) {
       supabase
         .from('site_profile')
         .select('logo_url')
-        .eq('lembaga_id', activeRole.lembaga.id)
+        .eq('lembaga_id', activeRole.lembaga_id)
         .single()
         .then(({ data }) => {
           if (data?.logo_url) setLogoUrl(data.logo_url);
@@ -106,7 +103,7 @@ export function DashboardLayout() {
         .from('teachers')
         .select('akses')
         .eq('user_id', user.id)
-        .eq('lembaga_id', activeRole.lembaga.id)
+        .eq('lembaga_id', activeRole.lembaga_id)
         .single()
         .then(({ data }) => {
           if (data?.akses) setTeacherAccess(data.akses);
@@ -424,7 +421,7 @@ export function DashboardLayout() {
                     {roles.map((r, i) => (
                       <DropdownMenuItem 
                         key={i} 
-                        className={`cursor-pointer rounded-lg mb-1 ${activeRole?.lembaga.id === r.lembaga.id && activeRole?.role === r.role ? 'bg-emerald-50 text-emerald-700' : ''}`}
+                        className={`cursor-pointer rounded-lg mb-1 ${activeRole?.lembaga_id === r.lembaga_id && activeRole?.role === r.role ? 'bg-emerald-50 text-emerald-700' : ''}`}
                         onClick={() => setActiveRole(r)}
                       >
                         <div className="flex flex-col">
@@ -483,7 +480,7 @@ export function DashboardLayout() {
 
         return (
           <nav className="lg:hidden fixed bottom-0 left-0 w-full bg-white border-t border-gray-100 z-40 flex items-center justify-between px-2 py-1 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] pb-safe">
-            {bottomItems.map((item, idx) => {
+            {bottomItems.map((item) => {
               if (item === null) {
                 // Center MENU button
                 return (

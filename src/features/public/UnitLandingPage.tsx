@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { 
-  ArrowRight, 
   MapPin, 
   Phone, 
   Mail, 
@@ -13,9 +12,7 @@ import {
   Clock,
   Menu,
   X,
-  BookOpen,
-  Users,
-  Palette
+  BookOpen
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 

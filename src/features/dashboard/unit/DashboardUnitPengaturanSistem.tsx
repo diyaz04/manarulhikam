@@ -33,8 +33,6 @@ type JamPelajaran = {
   waktu_selesai: string;
 };
 
-const HARI_LIST = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Ahad"];
-
 export default function DashboardUnitPengaturanSistem() {
   const { activeRole } = useAuth();
   const [activeTab, setActiveTab] = useState<"TAHUN_AJARAN" | "HARI_LIBUR" | "AGENDA_KEHADIRAN">("TAHUN_AJARAN");
@@ -54,9 +52,8 @@ export default function DashboardUnitPengaturanSistem() {
   const [holidayForm, setHolidayForm] = useState({ nama: "", tanggal_mulai: "", tanggal_selesai: "", academic_year_id: "" });
   
   // Jam Pelajaran form states
-  const [selectedYearId, setSelectedYearId] = useState<string | null>(null);
+  const [, setSelectedYearId] = useState<string | null>(null);
   const [jamPelajaranList, setJamPelajaranList] = useState<JamPelajaran[]>([]);
-  const [selectedHari, setSelectedHari] = useState<string>("Senin");
   const [jamKeForm, setJamKeForm] = useState({ jam_ke: 1, waktu_mulai: "07:00", waktu_selesai: "07:45" });
 
   // Agenda config states
@@ -71,7 +68,7 @@ export default function DashboardUnitPengaturanSistem() {
 
   const fetchAgendaConfig = async () => {
     try {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('agenda_configs')
         .select('toleransi_menit')
         .eq('lembaga_id', activeRole!.lembaga_id)
@@ -202,7 +199,7 @@ export default function DashboardUnitPengaturanSistem() {
 
   const handleOpenJamModal = (yearId: string) => {
     setSelectedYearId(yearId);
-    fetchJamPelajaran(yearId);
+    fetchJamPelajaran();
     setIsJamModalOpen(true);
   };
 

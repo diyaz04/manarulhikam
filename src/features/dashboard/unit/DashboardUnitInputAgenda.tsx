@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Camera, Upload, AlertCircle, Save, CheckCircle2, Clock, CheckCircle, XCircle } from "lucide-react";
+import { Loader2, Camera, Upload, AlertCircle, Save, CheckCircle2 } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
@@ -57,7 +57,7 @@ export function DashboardUnitInputAgenda() {
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
-  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [, setSubmitSuccess] = useState(false);
 
   const [activeYear, setActiveYear] = useState<any>(null);
   const [toleransiMenit, setToleransiMenit] = useState<number>(30); // default
@@ -317,7 +317,7 @@ export function DashboardUnitInputAgenda() {
         agendaPayload.status_kehadiran_guru = finalStatusKehadiran;
       } else {
         agendaPayload.status = 'VERIFIED';
-        agendaPayload.diverifikasi_oleh = activeRole!.user.id;
+        agendaPayload.diverifikasi_oleh = user!.id;
         agendaPayload.tanggal_verifikasi = new Date().toISOString();
         agendaPayload.status_kehadiran_guru = statusKehadiranGuru; 
       }

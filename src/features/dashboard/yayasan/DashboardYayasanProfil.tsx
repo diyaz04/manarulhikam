@@ -3,7 +3,7 @@ import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CloudinaryUpload } from "@/components/common/CloudinaryUpload";
 import { Loader2, Save, CheckCircle2 } from "lucide-react";
 
@@ -90,8 +90,7 @@ export function DashboardYayasanProfil() {
     setSaveSuccess(false);
 
     try {
-      const dataToSave = { ...formData };
-      delete dataToSave.id; // Don't try to update the ID
+      const { id: _id, ...dataToSave } = formData;
       
       let error;
       

@@ -1,4 +1,4 @@
-import { BookOpen, Monitor, Presentation, Tent, Utensils, Wheat } from "lucide-react"; // Using generic icons for fasilitas
+import { BookOpen, Monitor, Presentation, Tent, Wheat } from "lucide-react"; // Using generic icons for fasilitas
 
 export function FasilitasSection() {
   const fasilitasList = [

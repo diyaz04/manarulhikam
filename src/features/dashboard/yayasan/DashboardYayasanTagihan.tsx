@@ -3,7 +3,7 @@ import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardHeader } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Loader2, Plus, Download, AlertTriangle, CheckCircle2, Search, X } from "lucide-react";
@@ -13,8 +13,6 @@ import { Label } from "@/components/ui/label";
 
 interface Lembaga { id: string; nama: string; kode: string; }
 interface Template { id: string; lembaga_id: string; jenis_tagihan: string; nominal: number; tipe_periode: string; }
-interface Student { id: string; nama: string; nisn: string; kelas: string; angkatan: number; }
-interface Override { student_id: string; tipe: string; nominal_override: number; start_date: string; end_date: string; }
 interface Bill { id: string; student_id: string; student_nama?: string; nisn?: string; kelas?: string; lembaga_nama?: string; jenis_tagihan_final: string; nominal: number; nominal_terbayar: number; status: string; }
 
 export function DashboardYayasanTagihan() {

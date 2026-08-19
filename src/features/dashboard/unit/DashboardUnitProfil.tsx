@@ -152,7 +152,7 @@ export function DashboardUnitProfil() {
               <Label>Logo Lembaga</Label>
               <CloudinaryUpload 
                 onUploadSuccess={(url) => setFormData({...formData, logo_url: url})}
-                defaultValue={formData.logo_url}
+                defaultImage={formData.logo_url}
               />
               <p className="text-xs text-muted-foreground mt-1">Gunakan format PNG transparan agar terlihat rapi (max 2MB).</p>
             </div>
@@ -161,7 +161,7 @@ export function DashboardUnitProfil() {
               <Label>Gambar Banner (Hero Image)</Label>
               <CloudinaryUpload 
                 onUploadSuccess={(url) => setFormData({...formData, gambar_url: url})}
-                defaultValue={formData.gambar_url}
+                defaultImage={formData.gambar_url}
               />
               <p className="text-xs text-muted-foreground mt-1">Gambar lebar berukuran HD (contoh: 1920x1080) untuk sampul di Landing Page (max 5MB).</p>
             </div>

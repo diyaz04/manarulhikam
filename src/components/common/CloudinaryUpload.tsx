@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Loader2, UploadCloud, Image as ImageIcon, X } from "lucide-react";
+import { Loader2, UploadCloud, X } from "lucide-react";
 
 interface CloudinaryUploadProps {
   onUploadSuccess: (url: string) => void;

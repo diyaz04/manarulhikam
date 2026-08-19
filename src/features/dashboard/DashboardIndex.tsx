@@ -1,11 +1,10 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { Card } from "@/components/ui/card";
+
 import { Input } from "@/components/ui/input";
 import { Link, Navigate } from "react-router-dom";
 import { 
   Users, 
   Search, 
-  ChevronRight, 
   Wallet, 
   Receipt, 
   FileCheck2, 
