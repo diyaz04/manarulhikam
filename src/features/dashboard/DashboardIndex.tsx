@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Link, Navigate, useOutletContext } from "react-router-dom";
 import { 
   Users, Search, Wallet, Receipt, FileCheck2, Settings, School,
-  FileText, CreditCard, Calendar, ClipboardList, Home, CheckCircle2,
+  FileText, CreditCard, CheckCircle2,
   Clock, AlertTriangle, UserX, BookOpen, Loader2
 } from "lucide-react";
 import { useEffect, useState } from "react";
