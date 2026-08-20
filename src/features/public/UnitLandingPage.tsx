@@ -198,6 +198,30 @@ export function UnitLandingPage({ unitCode }: { unitCode: string }) {
             </button>
           </div>
         </div>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden bg-white border-t border-gray-100 px-4 pt-2 pb-6 shadow-lg">
+            <div className="flex flex-col space-y-4">
+              <a href="#profil" className="text-base font-bold text-gray-800 py-2" onClick={() => setMobileMenuOpen(false)}>Profil</a>
+              <a href="#berita" className="text-base font-bold text-gray-800 py-2" onClick={() => setMobileMenuOpen(false)}>Berita & Agenda</a>
+              <a href="#fasilitas" className="text-base font-bold text-gray-800 py-2" onClick={() => setMobileMenuOpen(false)}>Fasilitas</a>
+              
+              <div className="border-t border-gray-100 pt-4 flex flex-col gap-3 mt-2">
+                <Link to="/" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="outline" className={`w-full rounded-full font-bold ${theme.text} border-gray-200`}>
+                    Kembali ke Yayasan
+                  </Button>
+                </Link>
+                <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
+                  <Button className={`w-full rounded-full font-bold text-white ${theme.bg} hover:${theme.hover}`}>
+                    Login Admin
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
       </nav>
 
       <main className="flex-grow pt-20">

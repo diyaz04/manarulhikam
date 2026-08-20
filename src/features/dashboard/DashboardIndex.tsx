@@ -216,34 +216,34 @@ export function DashboardIndex() {
         </>
       ) : (
         <div className="space-y-4 mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
             <Card className="border border-gray-100 shadow-sm bg-white overflow-hidden rounded-2xl relative group">
-              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform">
-                <Users className="w-16 h-16" />
+              <div className="absolute top-0 right-0 p-3 sm:p-4 opacity-5 group-hover:scale-110 transition-transform">
+                <Users className="w-12 h-12 sm:w-16 sm:h-16" />
               </div>
-              <CardContent className="p-6">
-                <p className="text-sm font-semibold text-gray-500 mb-1">Total Siswa</p>
-                {loadingStats ? <Loader2 className="w-6 h-6 animate-spin text-gray-400" /> : <h3 className="text-3xl font-black text-slate-800">{stats.siswa}</h3>}
+              <CardContent className="p-3 sm:p-6">
+                <p className="text-xs sm:text-sm font-semibold text-gray-500 mb-1">Total Siswa</p>
+                {loadingStats ? <Loader2 className="w-6 h-6 animate-spin text-gray-400" /> : <h3 className="text-xl sm:text-3xl font-black text-slate-800">{stats.siswa}</h3>}
               </CardContent>
             </Card>
             
             <Card className="border border-gray-100 shadow-sm bg-white overflow-hidden rounded-2xl relative group">
-              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform">
-                <School className="w-16 h-16" />
+              <div className="absolute top-0 right-0 p-3 sm:p-4 opacity-5 group-hover:scale-110 transition-transform">
+                <School className="w-12 h-12 sm:w-16 sm:h-16" />
               </div>
-              <CardContent className="p-6">
-                <p className="text-sm font-semibold text-gray-500 mb-1">Total Guru</p>
-                {loadingStats ? <Loader2 className="w-6 h-6 animate-spin text-gray-400" /> : <h3 className="text-3xl font-black text-slate-800">{stats.guru}</h3>}
+              <CardContent className="p-3 sm:p-6">
+                <p className="text-xs sm:text-sm font-semibold text-gray-500 mb-1">Total Guru</p>
+                {loadingStats ? <Loader2 className="w-6 h-6 animate-spin text-gray-400" /> : <h3 className="text-xl sm:text-3xl font-black text-slate-800">{stats.guru}</h3>}
               </CardContent>
             </Card>
             
             <Card className="border border-red-100 shadow-sm bg-red-50/30 overflow-hidden rounded-2xl relative group">
-              <div className="absolute top-0 right-0 p-4 opacity-10 text-red-600 group-hover:scale-110 transition-transform">
-                <UserX className="w-16 h-16" />
+              <div className="absolute top-0 right-0 p-3 sm:p-4 opacity-10 text-red-600 group-hover:scale-110 transition-transform">
+                <UserX className="w-12 h-12 sm:w-16 sm:h-16" />
               </div>
-              <CardContent className="p-6">
-                <p className="text-sm font-semibold text-red-600/80 mb-1">Siswa Absen (Hari ini)</p>
-                {loadingStats ? <Loader2 className="w-6 h-6 animate-spin text-red-400" /> : <h3 className="text-3xl font-black text-red-600">{stats.siswaTidakHadir}</h3>}
+              <CardContent className="p-3 sm:p-6">
+                <p className="text-[10px] sm:text-sm font-semibold text-red-600/80 mb-1">Siswa Absen</p>
+                {loadingStats ? <Loader2 className="w-6 h-6 animate-spin text-red-400" /> : <h3 className="text-xl sm:text-3xl font-black text-red-600">{stats.siswaTidakHadir}</h3>}
               </CardContent>
             </Card>
           </div>

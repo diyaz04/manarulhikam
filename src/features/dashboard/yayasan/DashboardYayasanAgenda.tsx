@@ -234,7 +234,7 @@ export function DashboardYayasanAgenda() {
           Belum ada agenda. Klik "Tambah Agenda" untuk memulai.
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-2 gap-4 sm:gap-6">
           {items.map((item) => (
             <Card key={item.id} className="overflow-hidden">
               <CardContent className="p-6">
