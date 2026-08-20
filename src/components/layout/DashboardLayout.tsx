@@ -33,7 +33,8 @@ import {
   UserCheck,
   GraduationCap,
   Edit3,
-  UserCircle
+  UserCircle,
+  Camera
 } from "lucide-react";
 
 export function DashboardLayout() {
@@ -140,6 +141,7 @@ export function DashboardLayout() {
 
     if (isGuru) {
       const akademikItems = [
+        { name: "Absen Kedatangan", href: "/dashboard/guru/kedatangan", icon: Camera },
         { name: "Isi Agenda & Absen", href: "/dashboard/guru/agenda", icon: ClipboardList },
       ];
       
@@ -196,6 +198,7 @@ export function DashboardLayout() {
         items: [
           { name: "Monitoring Agenda", href: "/dashboard/unit/monitoring-agenda", icon: Calendar },
           { name: "Input Agenda Susulan", href: "/dashboard/unit/input-agenda", icon: ClipboardList },
+          { name: "Verifikasi Kedatangan", href: "/dashboard/unit/verifikasi-kedatangan", icon: Camera },
           { name: "Verifikasi Absensi", href: "/dashboard/unit/absensi", icon: FileCheck2 },
           { name: "Kehadiran Siswa", href: "/dashboard/unit/kehadiran-siswa", icon: UserCheck },
           { name: "Hitung Gaji Guru", href: "/dashboard/unit/penggajian", icon: BadgeDollarSign },

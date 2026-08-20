@@ -12,7 +12,8 @@ import {
   Clock,
   Menu,
   X,
-  BookOpen
+  BookOpen,
+  ArrowRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -202,42 +203,95 @@ export function UnitLandingPage({ unitCode }: { unitCode: string }) {
       <main className="flex-grow pt-20">
         
         {/* HERO SECTION */}
-        <section className={`relative overflow-hidden ${theme.nuansaAnak ? 'bg-[#fdfbf7]' : 'bg-white'}`}>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-24 md:pt-24 md:pb-32">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-              <div className="relative z-10 text-center lg:text-left">
+        <section className={`relative pt-16 md:pt-24 overflow-hidden ${theme.nuansaAnak ? 'bg-[#fdfbf7]' : 'bg-white'}`}>
+          {/* Background Dot Pattern (Top Right) */}
+          <div className="absolute top-20 right-4 lg:right-10 p-4 opacity-50 z-0 hidden sm:block">
+            <div className="grid grid-cols-4 gap-3">
+              {[...Array(32)].map((_, i) => (
+                <div key={i} className={`w-1.5 h-1.5 rounded-full ${theme.bg} opacity-60`}></div>
+              ))}
+            </div>
+          </div>
+          
+          {/* Mobile Dot Pattern */}
+          <div className="absolute top-16 right-0 p-4 opacity-70 z-0 sm:hidden">
+            <div className="grid grid-cols-3 gap-2.5">
+              {[...Array(21)].map((_, i) => (
+                <div key={i} className={`w-1.5 h-1.5 rounded-full ${theme.bg}`}></div>
+              ))}
+            </div>
+          </div>
+
+          <div className="max-w-7xl mx-auto px-6 sm:px-8 relative z-10 pt-4 lg:pt-12">
+            <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
+              
+              {/* Text Content (Left on Desktop, Top on Mobile) */}
+              <div className="w-full lg:w-1/2 flex flex-col justify-center text-left relative z-10">
                 {theme.nuansaAnak && (
-                  <div className="absolute -top-10 -left-10 w-20 h-20 bg-yellow-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"></div>
+                  <div className="absolute -top-10 -left-10 w-20 h-20 bg-yellow-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse -z-10"></div>
                 )}
-                <div className={`inline-flex items-center rounded-full px-4 py-1.5 ${theme.light} ${theme.text} font-bold text-sm mb-6`}>
-                  <span className="flex w-2 h-2 rounded-full mr-2 bg-current"></span>
-                  Penerimaan Siswa Baru Dibuka
+                
+                {/* Badge */}
+                <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full ${theme.light} mb-6 w-fit border ${theme.border}`}>
+                  <div className={`w-2 h-2 rounded-full ${theme.bg}`}></div>
+                  <span className={`text-sm font-medium ${theme.text}`}>Penerimaan Siswa Baru Dibuka</span>
                 </div>
-                <h1 className={`text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 tracking-tight leading-[1.1] mb-6 ${theme.nuansaAnak ? 'font-comic' : ''}`}>
-                  Masa Depan Cerah Dimulai Dari <span className={`text-transparent bg-clip-text bg-gradient-to-r ${theme.gradient}`}>{lembaga.nama}</span>
+
+                {/* Headline */}
+                <h1 className={`text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.1] mb-1 ${theme.nuansaAnak ? 'font-comic' : ''}`}>
+                  Masa Depan Cerah
                 </h1>
-                <p className="text-lg text-gray-600 mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed">
+                <h1 className={`text-4xl md:text-5xl lg:text-6xl font-black ${theme.text} tracking-tight leading-[1.1] mb-6 ${theme.nuansaAnak ? 'font-comic' : ''}`}>
+                  Dimulai Dari {lembaga.nama}
+                </h1>
+                
+                {/* Decorative Line */}
+                <div className={`w-12 h-1 ${theme.bg} mb-6 rounded-full`}></div>
+
+                {/* Subtitle */}
+                <p className="text-base md:text-lg text-gray-500 mb-8 max-w-sm lg:max-w-lg leading-relaxed font-medium">
                   {profile?.deskripsi_singkat || "Kami berkomitmen memberikan pendidikan terbaik yang mengintegrasikan ilmu pengetahuan umum dan nilai-nilai keislaman."}
                 </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                  <a href={`https://wa.me/${profile?.telepon?.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer">
-                    <Button className={`h-14 px-8 text-base font-bold rounded-full w-full sm:w-auto shadow-lg hover:shadow-xl transition-all ${theme.bg} hover:${theme.hover} text-white`}>
-                      Hubungi Pendaftaran
-                    </Button>
+                
+                {/* Buttons */}
+                <div className="flex flex-row flex-wrap items-center gap-4">
+                  <a 
+                    href={`https://wa.me/${profile?.telepon?.replace(/[^0-9]/g, '')}`} 
+                    target="_blank" 
+                    rel="noreferrer"
+                    className={`inline-flex items-center justify-center px-5 py-3 text-sm font-semibold rounded-xl text-white ${theme.bg} hover:${theme.hover} transition-all shadow-lg`}
+                  >
+                    Hubungi Pendaftaran
+                    <ArrowRight className="ml-1.5 w-4 h-4" />
                   </a>
-                  <a href="#profil">
-                    <Button variant="outline" className={`h-14 px-8 text-base font-bold rounded-full w-full sm:w-auto border-gray-200 hover:bg-gray-50 text-gray-700`}>
-                      Pelajari Lebih Lanjut
-                    </Button>
+                  <a 
+                    href="#profil"
+                    className="inline-flex items-center justify-center px-5 py-3 text-sm font-semibold rounded-xl text-slate-800 bg-white border border-gray-100 hover:bg-gray-50 hover:border-gray-200 transition-colors shadow-sm"
+                  >
+                    Pelajari Lebih Lanjut
                   </a>
                 </div>
               </div>
-              <div className="relative hidden lg:block">
-                <div className={`absolute inset-0 bg-gradient-to-tr ${theme.gradient} rounded-3xl transform rotate-3 opacity-20`}></div>
+
+              {/* Image Content - DESKTOP ONLY */}
+              <div className="hidden lg:block w-full lg:w-1/2 relative mt-12 lg:mt-0">
+                <div className={`absolute inset-0 bg-gradient-to-tr ${theme.gradient} rounded-[2rem] transform rotate-3 opacity-20`}></div>
+                
+                {/* Round Logo Overlapping */}
+                <div className="absolute -top-12 -left-12 z-30">
+                  <div className={`w-32 h-32 rounded-full bg-white p-1.5 shadow-2xl flex items-center justify-center overflow-hidden border-4 ${theme.border}`}>
+                     <img 
+                      src={profile?.logo_url || theme.logoPath} 
+                      alt="Logo Lembaga" 
+                      className="w-full h-full object-contain rounded-full bg-white p-2"
+                    />
+                  </div>
+                </div>
+
                 <img 
                   src={profile?.foto_url || theme.heroPath} 
                   alt="Hero Image" 
-                  className="relative rounded-3xl shadow-2xl object-cover h-[500px] w-full"
+                  className="relative rounded-[2rem] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.3)] object-cover aspect-[4/3] w-full border-4 border-white"
                 />
                 {theme.nuansaAnak && (
                   <>
@@ -245,6 +299,66 @@ export function UnitLandingPage({ unitCode }: { unitCode: string }) {
                     <div className="absolute -top-6 -right-6 w-16 h-16 bg-pink-400 rounded-full mix-blend-multiply filter blur-xl opacity-70"></div>
                   </>
                 )}
+              </div>
+            </div>
+          </div>
+
+          {/* Image & Bottom Section - MOBILE ONLY */}
+          <div className="relative mt-12 w-full flex flex-col lg:hidden">
+            {/* Custom SVG Curve overlaying the image top */}
+            <div className="absolute top-0 left-0 w-full overflow-hidden leading-none z-10 h-16 sm:h-24 -translate-y-[1px]">
+              <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="w-full h-full relative block">
+                <path d="M0,120 C300,120 400,0 1200,0 L1200,0 L0,0 Z" fill={theme.nuansaAnak ? '#fdfbf7' : '#ffffff'}></path>
+              </svg>
+            </div>
+
+            {/* Round Logo Overlapping */}
+            <div className="absolute top-12 sm:top-16 left-8 sm:left-16 z-30">
+              <div className={`w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-white p-1.5 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.4)] flex items-center justify-center overflow-hidden border-4 border-white`}>
+                 <img 
+                  src={profile?.logo_url || theme.logoPath} 
+                  alt="Logo Lembaga" 
+                  className="w-full h-full object-contain rounded-full bg-white p-2"
+                />
+              </div>
+            </div>
+
+            {/* Image Area */}
+            <div className="relative w-full" style={{ height: '400px' }}>
+              <img 
+                src={profile?.foto_url || theme.heroPath} 
+                alt="Hero Image" 
+                className="w-full h-full object-cover object-center"
+              />
+            </div>
+
+            {/* Custom SVG Curve for the bottom */}
+            <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-10 translate-y-[1px]">
+              <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className={`w-full h-24 sm:h-32 relative block rotate-180 ${theme.text}`}>
+                <path d="M0,120 C400,120 600,0 1200,0 L1200,0 L0,0 Z" fill="currentColor"></path>
+              </svg>
+            </div>
+          </div>
+
+          {/* Dark Area (matches the curve color) */}
+          <div className={`relative ${theme.bg} pt-4 pb-12 px-4 sm:px-6 lg:px-8 flex justify-center z-20 lg:mt-24 lg:rounded-t-[3rem]`}>
+            {/* The Floating Card equivalent for Units */}
+            <div className="w-full max-w-5xl bg-white rounded-3xl p-6 sm:p-8 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)] relative -mt-8 sm:-mt-12 lg:-mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+              <div>
+                <h3 className={`text-2xl font-bold ${theme.text}`}>A</h3>
+                <p className="text-xs text-gray-500 mt-1">Akreditasi</p>
+              </div>
+              <div>
+                <h3 className={`text-2xl font-bold ${theme.text}`}>100+</h3>
+                <p className="text-xs text-gray-500 mt-1">Siswa Aktif</p>
+              </div>
+              <div>
+                <h3 className={`text-2xl font-bold ${theme.text}`}>20+</h3>
+                <p className="text-xs text-gray-500 mt-1">Guru & Staf</p>
+              </div>
+              <div>
+                <h3 className={`text-2xl font-bold ${theme.text}`}>Beragam</h3>
+                <p className="text-xs text-gray-500 mt-1">Ekstrakurikuler</p>
               </div>
             </div>
           </div>

@@ -64,35 +64,109 @@ export function DashboardGuruIndex() {
     }
   };
 
+  const [greeting, setGreeting] = useState("Selamat Pagi");
+  const [bannerConfig, setBannerConfig] = useState({
+    bg: "from-blue-50 via-blue-50 to-amber-50",
+    emoji: "☀️"
+  });
+
+  useEffect(() => {
+    const hour = new Date().getHours();
+    if (hour >= 18 || hour < 4) {
+      setGreeting("Selamat Malam");
+      setBannerConfig({ bg: "from-indigo-900 via-slate-800 to-indigo-950", emoji: "🌙" });
+    } else if (hour >= 15) {
+      setGreeting("Selamat Sore");
+      setBannerConfig({ bg: "from-orange-50 via-orange-50 to-orange-100", emoji: "🌅" });
+    } else if (hour >= 11) {
+      setGreeting("Selamat Siang");
+      setBannerConfig({ bg: "from-sky-50 via-white to-sky-100", emoji: "🌤️" });
+    } else {
+      setGreeting("Selamat Pagi");
+      setBannerConfig({ bg: "from-blue-50 via-blue-50 to-amber-50", emoji: "☀️" });
+    }
+  }, []);
+
   if (loading) return <div className="p-8 text-center text-gray-500">Memuat dashboard...</div>;
 
   const hasAkses = (key: string) => teacher?.akses?.includes(key);
 
+  const teacherName = teacher?.nama || user?.user_metadata?.full_name || "Guru";
+  
+  // Simple heuristic for Indonesian names to guess gender since it's not in DB yet
+  const isFemale = (name: string) => {
+    if (!name) return false;
+    const n = name.toLowerCase();
+    const femaleKeywords = ['siti ', 'nur ', 'ayu ', 'putri', 'dewi', 'sri ', 'nita', 'rini', 'yuli', 'sari', 'fitri', 'aisyah', 'fatimah', 'endang', 'ani ', 'indah', 'lestari', 'mega', 'rina', 'wahyuni', 'wulandari', 'ibu ', 'ustadzah'];
+    return femaleKeywords.some(kw => n.includes(kw));
+  };
+
+  const isPerempuan = isFemale(teacherName);
+  const heroImg = isPerempuan ? "/guru_perempuan_teknologi.jpg" : "/guru_laki_teknologi.jpg";
+
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
-      {/* Welcome Banner */}
-      <div className="bg-gradient-to-r from-emerald-600 to-emerald-800 rounded-3xl p-6 md:p-8 text-white shadow-lg relative overflow-hidden">
-        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center gap-4 md:gap-6">
-          <div className="w-16 h-16 md:w-20 md:h-20 rounded-full border-4 border-emerald-400/30 overflow-hidden bg-emerald-700 shrink-0 shadow-inner">
-            {user?.user_metadata?.avatar_url ? (
-              <img src={user.user_metadata.avatar_url} alt="Profile" className="w-full h-full object-cover" />
-            ) : (
-              <span className="w-full h-full flex items-center justify-center font-bold text-3xl text-emerald-100">
-                {user?.user_metadata?.full_name?.charAt(0) || teacher?.nama?.charAt(0) || "G"}
-              </span>
-            )}
-          </div>
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold mb-1.5">Ahlan wa Sahlan, {teacher?.nama || user?.user_metadata?.full_name}!</h1>
-            <p className="text-emerald-50 text-sm md:text-base opacity-90 max-w-xl">
+      {activeRole?.role === 'GURU' ? (
+        <div className={`relative w-full rounded-2xl overflow-hidden bg-gradient-to-r ${bannerConfig.bg} p-6 sm:p-8 min-h-[160px] md:min-h-[180px] flex items-center shadow-sm border border-gray-100/50 transition-all duration-1000`}>
+          {/* Decorative Shapes */}
+          <div className={`absolute top-0 right-0 w-[400px] h-full bg-gradient-to-l ${greeting === "Selamat Malam" ? 'from-black/40' : 'from-white/60'} to-transparent pointer-events-none`}></div>
+
+          <div className="relative z-10 max-w-[55%]">
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <span className="text-lg">{bannerConfig.emoji}</span>
+              <span className={`text-xs font-semibold tracking-wide ${greeting === "Selamat Malam" ? 'text-indigo-200' : 'text-gray-600'}`}>{greeting},</span>
+            </div>
+            <h1 className={`text-2xl sm:text-3xl font-black mb-2 tracking-tight leading-tight ${greeting === "Selamat Malam" ? 'text-white' : 'text-slate-900'}`}>
+              {teacherName}.
+            </h1>
+            <p className={`text-[11px] sm:text-xs mb-4 max-w-sm leading-relaxed ${greeting === "Selamat Malam" ? 'text-indigo-200' : 'text-slate-600'}`}>
               Selamat datang di Portal Guru {activeRole?.lembaga.nama}. Mari kita mulai hari ini dengan semangat berbagi ilmu.
             </p>
+            
+            <div className={`inline-flex items-center gap-2 px-3 py-1.5 backdrop-blur-sm rounded-lg border ${greeting === "Selamat Malam" ? 'bg-indigo-950/50 border-indigo-500/30' : 'bg-white/50 border-white/50'}`}>
+              <div className={`w-6 h-6 rounded-md flex items-center justify-center shadow-inner ${greeting === "Selamat Malam" ? 'bg-indigo-500 text-white' : 'bg-emerald-500 text-white'}`}>
+                <Users className="w-3 h-3" />
+              </div>
+              <div>
+                <p className={`text-[8px] font-bold uppercase tracking-widest ${greeting === "Selamat Malam" ? 'text-indigo-300' : 'text-emerald-800'}`}>Akses Akun</p>
+                <p className={`text-[10px] font-black capitalize leading-none ${greeting === "Selamat Malam" ? 'text-white' : 'text-slate-900'}`}>Guru</p>
+              </div>
+            </div>
+          </div>
+
+          {/* 3D Illustration overlapping the right edge */}
+          <div className="absolute right-0 bottom-0 h-full w-[60%] md:w-[50%] overflow-hidden flex select-none pointer-events-none [mask-image:linear-gradient(to_right,transparent_0%,black_35%)] -webkit-[mask-image:linear-gradient(to_right,transparent_0%,black_35%)]">
+            <img 
+              src={heroImg} 
+              alt="Welcome Illustration" 
+              className={`w-full h-full object-cover object-[center_15%] md:object-[center_20%] mix-blend-multiply opacity-95 transition-opacity duration-1000 ${greeting === "Selamat Malam" ? 'mix-blend-normal' : ''}`}
+            />
           </div>
         </div>
-        <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
-          <BookOpen className="w-40 h-40" />
+      ) : (
+        <div className="bg-gradient-to-r from-emerald-600 to-emerald-800 rounded-3xl p-6 md:p-8 text-white shadow-lg relative overflow-hidden">
+          <div className="relative z-10 flex flex-col sm:flex-row sm:items-center gap-4 md:gap-6">
+            <div className="w-16 h-16 md:w-20 md:h-20 rounded-full border-4 border-emerald-400/30 overflow-hidden bg-emerald-700 shrink-0 shadow-inner">
+              {user?.user_metadata?.avatar_url ? (
+                <img src={user.user_metadata.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                <span className="w-full h-full flex items-center justify-center font-bold text-3xl text-emerald-100">
+                  {user?.user_metadata?.full_name?.charAt(0) || teacher?.nama?.charAt(0) || "G"}
+                </span>
+              )}
+            </div>
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold mb-1.5">Ahlan wa Sahlan, {teacher?.nama || user?.user_metadata?.full_name}!</h1>
+              <p className="text-emerald-50 text-sm md:text-base opacity-90 max-w-xl">
+                Selamat datang di Portal Guru {activeRole?.lembaga.nama}. Mari kita mulai hari ini dengan semangat berbagi ilmu.
+              </p>
+            </div>
+          </div>
+          <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
+            <BookOpen className="w-40 h-40" />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Quick Access Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">

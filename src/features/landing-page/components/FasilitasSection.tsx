@@ -48,7 +48,7 @@ export function FasilitasSection() {
           <div className="w-16 h-1 bg-emerald-600 mx-auto rounded-full"></div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {fasilitasList.map((fasilitas) => (
             <div key={fasilitas.id} className="group relative rounded-xl overflow-hidden aspect-[4/3] bg-gray-200 border border-gray-100 shadow-sm">
               <img 

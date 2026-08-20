@@ -32,6 +32,8 @@ interface StudentAttendance {
   keterangan: string;
 }
 
+import { compressImage } from "@/lib/imageCompression";
+
 export function DashboardUnitInputAgenda() {
   const { activeRole, user } = useAuth();
   const isGuru = activeRole?.role === 'GURU';
@@ -53,6 +55,7 @@ export function DashboardUnitInputAgenda() {
   const [selectedSchedule, setSelectedSchedule] = useState<string>("");
   const [materi, setMateri] = useState<string>("");
   const [fotoUrl, setFotoUrl] = useState<string>("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [statusKehadiranGuru, setStatusKehadiranGuru] = useState<string>("TEPAT_WAKTU");
   
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -189,6 +192,7 @@ export function DashboardUnitInputAgenda() {
     setSelectedSchedule(schedule.id);
     setMateri("");
     setFotoUrl("");
+    setSelectedFile(null);
     setStatusKehadiranGuru("TEPAT_WAKTU");
     setSubmitError("");
     setSubmitSuccess(false);
@@ -238,6 +242,7 @@ export function DashboardUnitInputAgenda() {
     if (file) {
       const url = URL.createObjectURL(file);
       setFotoUrl(url); 
+      setSelectedFile(file);
     }
   };
 
@@ -248,17 +253,51 @@ export function DashboardUnitInputAgenda() {
       return;
     }
 
-    if (isGuru && !fotoUrl) {
+    if (isGuru && !fotoUrl && !selectedFile) {
       setSubmitError("Bukti kehadiran dari kamera wajib dilampirkan.");
       return;
     }
-    
-    const finalFoto = fotoUrl || "https://res.cloudinary.com/dztv5k4sa/image/upload/v1723824000/placeholder-agenda.png";
 
     try {
       setIsSubmitting(true);
       setSubmitError("");
       setSubmitSuccess(false);
+
+      let uploadedFotoUrl = fotoUrl;
+
+      if (selectedFile) {
+        try {
+          const compressedFile = await compressImage(selectedFile, 1200, 1200, 0.6);
+          const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+          const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+          
+          if (!cloudName || !uploadPreset) {
+            throw new Error("Konfigurasi Cloudinary belum diatur.");
+          }
+
+          const formData = new FormData();
+          formData.append("file", compressedFile);
+          formData.append("upload_preset", uploadPreset);
+
+          const uploadResponse = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+            method: "POST",
+            body: formData,
+          });
+
+          const uploadData = await uploadResponse.json();
+          if (uploadResponse.ok) {
+            uploadedFotoUrl = uploadData.secure_url;
+          } else {
+            throw new Error(uploadData.error?.message || "Gagal mengunggah foto");
+          }
+        } catch (err: any) {
+          setSubmitError("Upload foto gagal: " + err.message);
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
+      const finalFoto = uploadedFotoUrl || "https://res.cloudinary.com/dztv5k4sa/image/upload/v1723824000/placeholder-agenda.png";
 
       let finalStatusKehadiran = 'TEPAT_WAKTU';
 
@@ -272,9 +311,26 @@ export function DashboardUnitInputAgenda() {
           const [selesaiHours, selesaiMinutes] = jpSelesai.waktu_selesai.split(':').map(Number);
           
           const today = new Date();
-          const isToday = tanggal === today.toISOString().split('T')[0];
+          const todayStr = today.toISOString().split('T')[0];
+          const isToday = tanggal === todayStr;
+          
+          if (isGuru) {
+            if (tanggal > todayStr) {
+              setSubmitError("Waktu pengisian agenda belum masuk");
+              setIsSubmitting(false);
+              return;
+            }
+            if (tanggal < todayStr) {
+              setSubmitError("Waktu pengisian sudah habis di jadwal ini silahkan hubungi admin");
+              setIsSubmitting(false);
+              return;
+            }
+          }
           
           if (isToday) {
+            const batasAwal = new Date();
+            batasAwal.setHours(mulaiHours, mulaiMinutes, 0, 0);
+
             const batasTepatWaktu = new Date();
             batasTepatWaktu.setHours(mulaiHours, mulaiMinutes, 0, 0);
             batasTepatWaktu.setMinutes(batasTepatWaktu.getMinutes() + toleransiMenit);
@@ -282,9 +338,15 @@ export function DashboardUnitInputAgenda() {
             const batasAkhir = new Date();
             batasAkhir.setHours(selesaiHours, selesaiMinutes, 0, 0);
 
-            if (today > batasAkhir) {
+            if (today < batasAwal) {
               if (isGuru) {
-                setSubmitError(`Batas waktu pengisian agenda untuk kelas ini telah berakhir pada pukul ${batasAkhir.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit'})}. Silakan hubungi admin.`);
+                setSubmitError("Waktu pengisian agenda belum masuk");
+                setIsSubmitting(false);
+                return;
+              }
+            } else if (today > batasAkhir) {
+              if (isGuru) {
+                setSubmitError("Waktu pengisian sudah habis di jadwal ini silahkan hubungi admin");
                 setIsSubmitting(false);
                 return;
               }
@@ -292,12 +354,6 @@ export function DashboardUnitInputAgenda() {
               finalStatusKehadiran = 'TERLAMBAT';
             } else {
               finalStatusKehadiran = 'TEPAT_WAKTU';
-            }
-          } else {
-            if (isGuru) {
-              setSubmitError(`Batas waktu pengisian agenda untuk hari yang lalu sudah ditutup. Silakan hubungi admin.`);
-              setIsSubmitting(false);
-              return;
             }
           }
         }

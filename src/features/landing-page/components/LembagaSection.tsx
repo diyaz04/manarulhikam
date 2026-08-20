@@ -80,7 +80,7 @@ export function LembagaSection() {
           <div className="w-16 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 mx-auto rounded-full"></div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
           {lembagaList.map((lembaga) => {
             const spmbConfig = activeSpmbs[lembaga.id];
 

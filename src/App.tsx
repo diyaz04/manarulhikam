@@ -35,6 +35,8 @@ import { DashboardUnitPenggajian } from "@/features/dashboard/unit/DashboardUnit
 import { DashboardUnitKehadiranSiswa } from "@/features/dashboard/unit/DashboardUnitKehadiranSiswa";
 import { DashboardPengaturanAkun } from "@/features/dashboard/pengaturan/DashboardPengaturanAkun";
 import { PublicSpmb } from "@/features/landing-page/PublicSpmb";
+import { DashboardGuruKedatangan } from "@/features/dashboard/guru/DashboardGuruKedatangan";
+import { DashboardUnitVerifikasiKedatangan } from "@/features/dashboard/unit/DashboardUnitVerifikasiKedatangan";
 
 function App() {
   return (
@@ -78,6 +80,7 @@ function App() {
               {/* Unit Specific Routes */}
               {/* Guru Academic Routes */}
               <Route path="guru" element={<DashboardGuruIndex />} />
+              <Route path="guru/kedatangan" element={<DashboardGuruKedatangan />} />
               <Route path="guru/jadwal" element={<DashboardUnitJadwal />} />
               <Route path="guru/agenda" element={<DashboardUnitInputAgenda />} />
               <Route path="guru/rekap-siswa" element={<DashboardUnitKehadiranSiswa />} />
@@ -89,6 +92,7 @@ function App() {
               <Route path="unit/jadwal" element={<DashboardUnitJadwal />} />
               <Route path="unit/input-agenda" element={<DashboardUnitInputAgenda />} />
               <Route path="unit/monitoring-agenda" element={<DashboardUnitMonitoringAgenda />} />
+              <Route path="unit/verifikasi-kedatangan" element={<DashboardUnitVerifikasiKedatangan />} />
               <Route path="unit/spmb" element={<DashboardUnitSpmb />} />
               <Route path="unit/profil" element={<DashboardUnitProfil />} />
               <Route path="unit/pengaturan-sistem" element={<DashboardUnitPengaturanSistem />} />
