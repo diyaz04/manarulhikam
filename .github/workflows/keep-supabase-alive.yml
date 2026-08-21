@@ -16,9 +16,9 @@ jobs:
       - name: Ping Supabase API
         run: |
           echo "Melakukan ping ke Supabase untuk mencegah pause otomatis..."
-          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X GET "${{ secrets.SUPABASE_URL }}/rest/v1/" \
-            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}")
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X GET "${{ secrets.VITE_SUPABASE_URL }}/rest/v1/" \
+            -H "apikey: ${{ secrets.VITE_SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.VITE_SUPABASE_ANON_KEY }}")
           
           if [ "$HTTP_STATUS" -eq 200 ]; then
             echo "✅ Berhasil melakukan ping ke Supabase (Status: $HTTP_STATUS)"
