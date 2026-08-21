@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Outlet, Link, useLocation } from "react-router-dom";
+import { formatNamaLembaga } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
@@ -97,17 +98,19 @@ export function DashboardLayout() {
   }, [isYayasan, location.pathname]);
 
   const [teacherAccess, setTeacherAccess] = useState<string[]>([]);
+  const [isWaliKelas, setIsWaliKelas] = useState(false);
 
   useEffect(() => {
     if (activeRole?.role === 'GURU' && user) {
       supabase
         .from('teachers')
-        .select('akses')
+        .select('akses, wali_kelas_dari')
         .eq('user_id', user.id)
         .eq('lembaga_id', activeRole.lembaga_id)
         .single()
         .then(({ data }) => {
           if (data?.akses) setTeacherAccess(data.akses);
+          if (data?.wali_kelas_dari) setIsWaliKelas(true);
         });
     }
   }, [activeRole, user]);
@@ -149,8 +152,10 @@ export function DashboardLayout() {
         akademikItems.push({ name: "Jadwal Saya", href: "/dashboard/guru/jadwal", icon: Calendar });
       }
       
-      if (teacherAccess.includes('KEHADIRAN_SISWA')) {
-        akademikItems.push({ name: "Rekap Kehadiran Siswa", href: "/dashboard/guru/rekap-siswa", icon: Users });
+      akademikItems.push({ name: "Rekap Kehadiran Siswa", href: "/dashboard/guru/rekap-siswa", icon: Users });
+
+      if (isWaliKelas) {
+        akademikItems.push({ name: "Kehadiran Kelasku", href: "/dashboard/guru/kehadiran-kelasku", icon: UserCheck });
       }
 
       return [
@@ -167,6 +172,34 @@ export function DashboardLayout() {
         {
           title: "PENGATURAN",
           items: [
+            { name: "Pengaturan Akun", href: "/dashboard/pengaturan", icon: Settings },
+          ]
+        }
+      ];
+    }
+
+    const isMajlis = activeRole?.lembaga.kode === 'MAJLIS';
+
+    if (isMajlis) {
+      return [
+        {
+          title: "MENU UTAMA",
+          items: [
+            { name: "Dashboard Unit", href: "/dashboard", icon: LayoutDashboard },
+          ]
+        },
+        {
+          title: "MANAJEMEN KONTEN",
+          items: [
+            { name: "Berita Unit", href: "/dashboard/yayasan/berita", icon: FileText },
+            { name: "Agenda Kegiatan", href: "/dashboard/yayasan/agenda", icon: Calendar },
+            { name: "Fasilitas", href: "/dashboard/yayasan/fasilitas", icon: MapPin },
+          ]
+        },
+        {
+          title: "PENGATURAN",
+          items: [
+            { name: "Profil Majlis", href: "/dashboard/unit/profil", icon: Home },
             { name: "Pengaturan Akun", href: "/dashboard/pengaturan", icon: Settings },
           ]
         }
@@ -229,6 +262,7 @@ export function DashboardLayout() {
     return groups;
   })();
 
+
   const handleSignOut = async () => {
     await signOut();
   };
@@ -265,6 +299,7 @@ export function DashboardLayout() {
     if (code === 'SMP') return '/logo-smp.png';
     if (code === 'SMA') return '/logo-sma.png';
     if (code === 'PONTREN') return '/logo-pesantren.png';
+    if (code === 'MAJLIS') return '/logo-majlis.png';
     return '/logo-yayasan.png';
   };
 
@@ -291,7 +326,7 @@ export function DashboardLayout() {
             </div>
             <div className="flex flex-col">
               <span className="font-bold text-sm text-emerald-950 leading-tight tracking-tight">
-                {isYayasan ? "Yayasan Manarul Hikam" : activeRole?.lembaga.nama}
+                {isYayasan ? "Yayasan Manarul Hikam" : formatNamaLembaga(activeRole?.lembaga.nama || '')}
               </span>
               <span className="text-[10px] uppercase tracking-wider text-emerald-600 font-bold mt-0.5">
                 {isYayasan ? "Dashboard Yayasan" : `Dashboard ${activeRole?.lembaga.kode}`}
@@ -415,7 +450,7 @@ export function DashboardLayout() {
                 {/* Mobile Info */}
                 <div className="md:hidden px-2 py-3 border-b border-gray-100 mb-2">
                   <p className="text-sm font-bold text-gray-900">{user?.user_metadata?.full_name || "User"}</p>
-                  <p className="text-xs text-gray-500">{activeRole?.lembaga.nama}</p>
+                  <p className="text-xs text-gray-500">{formatNamaLembaga(activeRole?.lembaga.nama || '')}</p>
                 </div>
 
                 {roles.length > 1 && (
@@ -428,7 +463,7 @@ export function DashboardLayout() {
                         onClick={() => setActiveRole(r)}
                       >
                         <div className="flex flex-col">
-                           <span className="font-medium">{r.lembaga.nama}</span>
+                           <span className="font-medium">{formatNamaLembaga(r.lembaga.nama || '')}</span>
                           <span className="text-xs opacity-70">{r.role}</span>
                         </div>
                       </DropdownMenuItem>
@@ -468,7 +503,7 @@ export function DashboardLayout() {
           { label: "Beranda", href: "/dashboard/guru", icon: LayoutDashboard },
           { label: "Isi Agenda", href: "/dashboard/guru/agenda", icon: Edit3 },
           null,
-          teacherAccess.includes('JADWAL') ? { label: "Jadwal", href: "/dashboard/guru/jadwal", icon: Calendar } : (teacherAccess.includes('KEHADIRAN_SISWA') ? { label: "Rekap", href: "/dashboard/guru/rekap-siswa", icon: Users } : { label: "Beranda", href: "/dashboard/guru", icon: LayoutDashboard }),
+          teacherAccess.includes('JADWAL') ? { label: "Jadwal", href: "/dashboard/guru/jadwal", icon: Calendar } : { label: "Rekap", href: "/dashboard/guru/rekap-siswa", icon: Users },
           { label: "Profil", href: "/dashboard/pengaturan", icon: UserCircle },
         ] : isSmp ? [
           { label: "Beranda", href: "/dashboard", icon: LayoutDashboard },

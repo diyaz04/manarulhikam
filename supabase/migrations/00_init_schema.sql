@@ -12,10 +12,11 @@ CREATE TABLE public.lembaga (
 -- Insert Data Awal Lembaga
 INSERT INTO public.lembaga (nama, kode) VALUES
 ('Yayasan Manarul Hikam Tampian', 'YAYASAN'),
-('TK Manarul Hikam', 'TK'),
-('SMP Manarul Hikam', 'SMP'),
-('SMA Manarul Hikam', 'SMA'),
-('Pondok Pesantren Manarul Hikam', 'PONTREN');
+('TK IT Manarul Hikam', 'TK'),
+('SMP IT Manarul Hikam', 'SMP'),
+('SMA IT Manarul Hikam', 'SMA'),
+('Pondok Pesantren Manarul Hikam', 'PONTREN'),
+('Majlis Ta''lim Manarul Hikam', 'MAJLIS');
 
 -- 2. Tabel Users (Profil)
 CREATE TABLE public.users (

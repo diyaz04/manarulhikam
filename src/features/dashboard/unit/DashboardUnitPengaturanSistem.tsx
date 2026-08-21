@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
+import { formatNamaLembaga } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -271,7 +272,7 @@ export default function DashboardUnitPengaturanSistem() {
         <div>
           <h2 className="text-2xl font-bold tracking-tight text-gray-900">Pengaturan Sistem</h2>
           <p className="text-gray-500 text-sm mt-1">
-            Kelola kalender akademik dan jam pelajaran untuk {activeRole?.lembaga.nama}.
+            Kelola kalender akademik dan jam pelajaran untuk {formatNamaLembaga(activeRole?.lembaga.nama)}.
           </p>
         </div>
       </div>

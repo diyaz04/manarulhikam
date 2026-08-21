@@ -158,7 +158,7 @@ export function DashboardIndex() {
             {user?.user_metadata?.full_name || "Admin"}.
           </h1>
           <p className={`text-[11px] sm:text-xs mb-4 max-w-sm leading-relaxed ${greeting === "Selamat Malam" ? 'text-indigo-200' : 'text-slate-600'}`}>
-            Semoga hari ini penuh berkah dan kemudahan dalam mengelola sistem terpadu {activeRole?.lembaga.nama || "Yayasan"}.
+            Semoga hari ini penuh berkah dan kemudahan dalam mengelola sistem terpadu {activeRole?.lembaga.nama?.replace('TK Manarul Hikam', 'TK IT Manarul Hikam').replace('SMP Manarul Hikam', 'SMP IT Manarul Hikam').replace('SMA Manarul Hikam', 'SMA IT Manarul Hikam') || "Yayasan"}.
           </p>
           <div className={`inline-flex items-center gap-2 px-3 py-1.5 backdrop-blur-sm rounded-lg border ${greeting === "Selamat Malam" ? 'bg-indigo-950/50 border-indigo-500/30' : 'bg-white/50 border-white/50'}`}>
             <div className={`w-6 h-6 rounded-md flex items-center justify-center shadow-inner ${greeting === "Selamat Malam" ? 'bg-indigo-500 text-white' : 'bg-emerald-500 text-white'}`}>
@@ -216,74 +216,92 @@ export function DashboardIndex() {
         </>
       ) : (
         <div className="space-y-4 mt-6">
-          <div className="grid grid-cols-3 gap-2 sm:gap-3">
-            <Card className="border border-gray-100 shadow-sm bg-white overflow-hidden rounded-2xl relative group">
-              <div className="absolute top-0 right-0 p-3 sm:p-4 opacity-5 group-hover:scale-110 transition-transform">
-                <Users className="w-12 h-12 sm:w-16 sm:h-16" />
-              </div>
-              <CardContent className="p-3 sm:p-6">
-                <p className="text-xs sm:text-sm font-semibold text-gray-500 mb-1">Total Siswa</p>
-                {loadingStats ? <Loader2 className="w-6 h-6 animate-spin text-gray-400" /> : <h3 className="text-xl sm:text-3xl font-black text-slate-800">{stats.siswa}</h3>}
-              </CardContent>
-            </Card>
-            
-            <Card className="border border-gray-100 shadow-sm bg-white overflow-hidden rounded-2xl relative group">
-              <div className="absolute top-0 right-0 p-3 sm:p-4 opacity-5 group-hover:scale-110 transition-transform">
-                <School className="w-12 h-12 sm:w-16 sm:h-16" />
-              </div>
-              <CardContent className="p-3 sm:p-6">
-                <p className="text-xs sm:text-sm font-semibold text-gray-500 mb-1">Total Guru</p>
-                {loadingStats ? <Loader2 className="w-6 h-6 animate-spin text-gray-400" /> : <h3 className="text-xl sm:text-3xl font-black text-slate-800">{stats.guru}</h3>}
-              </CardContent>
-            </Card>
-            
-            <Card className="border border-red-100 shadow-sm bg-red-50/30 overflow-hidden rounded-2xl relative group">
-              <div className="absolute top-0 right-0 p-3 sm:p-4 opacity-10 text-red-600 group-hover:scale-110 transition-transform">
-                <UserX className="w-12 h-12 sm:w-16 sm:h-16" />
-              </div>
-              <CardContent className="p-3 sm:p-6">
-                <p className="text-[10px] sm:text-sm font-semibold text-red-600/80 mb-1">Siswa Absen</p>
-                {loadingStats ? <Loader2 className="w-6 h-6 animate-spin text-red-400" /> : <h3 className="text-xl sm:text-3xl font-black text-red-600">{stats.siswaTidakHadir}</h3>}
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card className="border border-emerald-100 shadow-sm bg-emerald-50/30 overflow-hidden rounded-2xl">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-3 bg-emerald-100 rounded-xl text-emerald-600">
-                  <BookOpen className="w-6 h-6" />
-                </div>
-                <div>
-                  <h2 className="text-lg font-bold text-emerald-900">Agenda & KBM Guru Hari Ini</h2>
-                  <p className="text-sm text-emerald-600/80">Pantau progres pengisian agenda mengajar harian.</p>
-                </div>
+          {activeRole?.lembaga.kode !== 'MAJLIS' && (
+            <>
+              <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                <Card className="border border-gray-100 shadow-sm bg-white overflow-hidden rounded-2xl relative group">
+                  <div className="absolute top-0 right-0 p-3 sm:p-4 opacity-5 group-hover:scale-110 transition-transform">
+                    <Users className="w-12 h-12 sm:w-16 sm:h-16" />
+                  </div>
+                  <CardContent className="p-3 sm:p-6">
+                    <p className="text-xs sm:text-sm font-semibold text-gray-500 mb-1">Total Siswa</p>
+                    {loadingStats ? <Loader2 className="w-6 h-6 animate-spin text-gray-400" /> : <h3 className="text-xl sm:text-3xl font-black text-slate-800">{stats.siswa}</h3>}
+                  </CardContent>
+                </Card>
+                
+                <Card className="border border-gray-100 shadow-sm bg-white overflow-hidden rounded-2xl relative group">
+                  <div className="absolute top-0 right-0 p-3 sm:p-4 opacity-5 group-hover:scale-110 transition-transform">
+                    <School className="w-12 h-12 sm:w-16 sm:h-16" />
+                  </div>
+                  <CardContent className="p-3 sm:p-6">
+                    <p className="text-xs sm:text-sm font-semibold text-gray-500 mb-1">Total Guru</p>
+                    {loadingStats ? <Loader2 className="w-6 h-6 animate-spin text-gray-400" /> : <h3 className="text-xl sm:text-3xl font-black text-slate-800">{stats.guru}</h3>}
+                  </CardContent>
+                </Card>
+                
+                <Card className="border border-red-100 shadow-sm bg-red-50/30 overflow-hidden rounded-2xl relative group">
+                  <div className="absolute top-0 right-0 p-3 sm:p-4 opacity-10 text-red-600 group-hover:scale-110 transition-transform">
+                    <UserX className="w-12 h-12 sm:w-16 sm:h-16" />
+                  </div>
+                  <CardContent className="p-3 sm:p-6">
+                    <p className="text-[10px] sm:text-sm font-semibold text-red-600/80 mb-1">Siswa Absen</p>
+                    {loadingStats ? <Loader2 className="w-6 h-6 animate-spin text-red-400" /> : <h3 className="text-xl sm:text-3xl font-black text-red-600">{stats.siswaTidakHadir}</h3>}
+                  </CardContent>
+                </Card>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 divide-y sm:divide-y-0 sm:divide-x divide-emerald-200/50">
-                <div className="py-2 sm:py-0 px-2">
-                  <p className="text-[11px] font-bold text-emerald-600 mb-1 uppercase tracking-wider">Target Agenda</p>
-                  {loadingStats ? <Loader2 className="w-5 h-5 animate-spin text-emerald-400" /> : <p className="text-2xl font-black text-emerald-950">{stats.agendaTotal}</p>}
+              <Card className="border border-emerald-100 shadow-sm bg-emerald-50/30 overflow-hidden rounded-2xl">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="p-3 bg-emerald-100 rounded-xl text-emerald-600">
+                      <BookOpen className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h2 className="text-lg font-bold text-emerald-900">Agenda & KBM Guru Hari Ini</h2>
+                      <p className="text-sm text-emerald-600/80">Pantau progres pengisian agenda mengajar harian.</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 divide-y sm:divide-y-0 sm:divide-x divide-emerald-200/50">
+                    <div className="py-2 sm:py-0 px-2">
+                      <p className="text-[11px] font-bold text-emerald-600 mb-1 uppercase tracking-wider">Target Agenda</p>
+                      {loadingStats ? <Loader2 className="w-5 h-5 animate-spin text-emerald-400" /> : <p className="text-2xl font-black text-emerald-950">{stats.agendaTotal}</p>}
+                    </div>
+                    <div className="py-2 sm:py-0 sm:px-4">
+                      <p className="text-[11px] font-bold text-emerald-600 mb-1 uppercase tracking-wider">Sudah Terisi</p>
+                      {loadingStats ? <Loader2 className="w-5 h-5 animate-spin text-emerald-400" /> : <p className="text-2xl font-black text-emerald-700">{stats.agendaTerisi}</p>}
+                    </div>
+                    <div className="py-2 sm:py-0 sm:px-4">
+                      <p className="text-[11px] font-bold text-emerald-600 mb-1 uppercase tracking-wider flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Tepat Waktu</p>
+                      {loadingStats ? <Loader2 className="w-5 h-5 animate-spin text-emerald-400" /> : <p className="text-2xl font-black text-emerald-600">{stats.agendaTepatWaktu}</p>}
+                    </div>
+                    <div className="py-2 sm:py-0 sm:px-4">
+                      <p className="text-[11px] font-bold text-orange-600 mb-1 uppercase tracking-wider flex items-center gap-1"><Clock className="w-3 h-3" /> Terlambat</p>
+                      {loadingStats ? <Loader2 className="w-5 h-5 animate-spin text-orange-400" /> : <p className="text-2xl font-black text-orange-600">{stats.agendaTerlambat}</p>}
+                    </div>
+                    <div className="py-2 sm:py-0 sm:px-4">
+                      <p className="text-[11px] font-bold text-amber-600 mb-1 uppercase tracking-wider flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> Verifikasi</p>
+                      {loadingStats ? <Loader2 className="w-5 h-5 animate-spin text-amber-400" /> : <p className="text-2xl font-black text-amber-600">{stats.agendaPending}</p>}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </>
+          )}
+          
+          {activeRole?.lembaga.kode === 'MAJLIS' && (
+            <Card className="border border-gray-100 shadow-sm bg-white overflow-hidden rounded-2xl mt-4">
+              <CardContent className="p-8 text-center">
+                <div className="w-16 h-16 bg-teal-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <FileText className="w-8 h-8 text-teal-600" />
                 </div>
-                <div className="py-2 sm:py-0 sm:px-4">
-                  <p className="text-[11px] font-bold text-emerald-600 mb-1 uppercase tracking-wider">Sudah Terisi</p>
-                  {loadingStats ? <Loader2 className="w-5 h-5 animate-spin text-emerald-400" /> : <p className="text-2xl font-black text-emerald-700">{stats.agendaTerisi}</p>}
-                </div>
-                <div className="py-2 sm:py-0 sm:px-4">
-                  <p className="text-[11px] font-bold text-emerald-600 mb-1 uppercase tracking-wider flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Tepat Waktu</p>
-                  {loadingStats ? <Loader2 className="w-5 h-5 animate-spin text-emerald-400" /> : <p className="text-2xl font-black text-emerald-600">{stats.agendaTepatWaktu}</p>}
-                </div>
-                <div className="py-2 sm:py-0 sm:px-4">
-                  <p className="text-[11px] font-bold text-orange-600 mb-1 uppercase tracking-wider flex items-center gap-1"><Clock className="w-3 h-3" /> Terlambat</p>
-                  {loadingStats ? <Loader2 className="w-5 h-5 animate-spin text-orange-400" /> : <p className="text-2xl font-black text-orange-600">{stats.agendaTerlambat}</p>}
-                </div>
-                <div className="py-2 sm:py-0 sm:px-4">
-                  <p className="text-[11px] font-bold text-amber-600 mb-1 uppercase tracking-wider flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> Verifikasi</p>
-                  {loadingStats ? <Loader2 className="w-5 h-5 animate-spin text-amber-400" /> : <p className="text-2xl font-black text-amber-600">{stats.agendaPending}</p>}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                <h2 className="text-xl font-bold text-gray-900 mb-2">Selamat Datang di Dashboard Majlis Ta'lim</h2>
+                <p className="text-gray-500 max-w-lg mx-auto">
+                  Melalui dashboard ini, Anda dapat mengelola konten website seperti Berita, Agenda Pengajian, dan Fasilitas yang akan langsung tampil pada halaman publik Majlis Ta'lim.
+                </p>
+              </CardContent>
+            </Card>
+          )}
         </div>
       )}
     </div>

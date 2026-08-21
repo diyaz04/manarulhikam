@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
+import { formatNamaLembaga } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -187,7 +188,7 @@ export function DashboardUnitSiswa() {
         <div>
           <h2 className="text-2xl font-bold tracking-tight text-gray-900">Data Siswa/Santri</h2>
           <p className="text-gray-500 text-sm mt-1">
-            Kelola data master siswa khusus unit {activeRole?.lembaga.nama}.
+            Kelola data master siswa khusus unit {formatNamaLembaga(activeRole?.lembaga.nama)}.
           </p>
         </div>
         
@@ -202,7 +203,7 @@ export function DashboardUnitSiswa() {
             <DialogHeader>
               <DialogTitle>{editingId ? "Edit Data Siswa" : "Input Data Siswa Baru"}</DialogTitle>
               <DialogDescription>
-                Data akan otomatis masuk ke unit {activeRole?.lembaga.nama}.
+                Data akan otomatis masuk ke unit {formatNamaLembaga(activeRole?.lembaga.nama)}.
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4 py-4">

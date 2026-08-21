@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
+import { formatNamaLembaga } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -86,13 +87,13 @@ export function DashboardYayasanSiswa() {
           // Merge lembaga info
           const existing = mergedStudents.get(key)!;
           if (!existing.allLembaga) {
-            existing.allLembaga = [existing.lembaga.nama];
+            existing.allLembaga = [formatNamaLembaga(existing.lembaga.nama)];
           }
-          if (!existing.allLembaga.includes(student.lembaga.nama)) {
-            existing.allLembaga.push(student.lembaga.nama);
+          if (!existing.allLembaga.includes(formatNamaLembaga(student.lembaga.nama))) {
+            existing.allLembaga.push(formatNamaLembaga(student.lembaga.nama));
           }
         } else {
-          student.allLembaga = [student.lembaga.nama];
+          student.allLembaga = [formatNamaLembaga(student.lembaga.nama)];
           mergedStudents.set(key, student);
         }
       });

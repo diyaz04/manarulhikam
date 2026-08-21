@@ -18,7 +18,7 @@ interface AuthContextType {
   user: User | null;
   roles: UserRole[];
   activeRole: UserRole | null;
-  setActiveRole: (role: UserRole) => void;
+  setActiveRole: (role: UserRole | null) => void;
   isLoading: boolean;
   signOut: () => Promise<void>;
 }
@@ -29,7 +29,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [roles, setRoles] = useState<UserRole[]>([]);
-  const [activeRole, setActiveRole] = useState<UserRole | null>(null);
+  const [activeRole, _setActiveRole] = useState<UserRole | null>(null);
+
+  const setActiveRole = (role: UserRole | null) => {
+    _setActiveRole(role);
+    if (role) {
+      localStorage.setItem('activeRoleId', role.id);
+    } else {
+      localStorage.removeItem('activeRoleId');
+    }
+  };
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -86,7 +95,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setRoles(typedData || []);
       
       // Auto-select first role if none is selected
-      if (typedData && typedData.length > 0 && !activeRole) {
+      const savedRoleId = localStorage.getItem('activeRoleId');
+      const savedRole = typedData?.find(r => r.id === savedRoleId);
+      
+      if (savedRole && !activeRole) {
+        setActiveRole(savedRole);
+      } else if (typedData && typedData.length > 0 && !activeRole) {
         setActiveRole(typedData[0]);
       }
     } catch (error) {

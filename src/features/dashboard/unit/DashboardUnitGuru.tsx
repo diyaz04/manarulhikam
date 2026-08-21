@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
+import { formatNamaLembaga } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -20,6 +21,7 @@ interface Teacher {
   email: string | null;
   user_id: string | null;
   akses: string[] | null; // ['ABSENSI', 'JADWAL', 'SISWA', etc.]
+  wali_kelas_dari: string | null;
   created_at: string;
 }
 
@@ -54,6 +56,7 @@ export function DashboardUnitGuru() {
     email: "",
     password: "",
     akses: ["ABSENSI", "JADWAL"] as string[], // Default akses
+    wali_kelas_dari: "",
   });
 
   useEffect(() => {
@@ -89,12 +92,12 @@ export function DashboardUnitGuru() {
       setSubmitError("");
       
       if (editingId) {
-        // Update guru
         const updatePayload: any = {
           nama: formData.nama,
           nip: formData.nip,
           jabatan: formData.jabatan,
           status: formData.status,
+          wali_kelas_dari: formData.wali_kelas_dari || null,
         };
 
         // Kalau SMP, simpan juga akses
@@ -177,6 +180,7 @@ export function DashboardUnitGuru() {
           nip: formData.nip,
           jabatan: formData.jabatan,
           status: formData.status,
+          wali_kelas_dari: formData.wali_kelas_dari || null,
         };
 
         if (isSMP) {
@@ -244,6 +248,7 @@ export function DashboardUnitGuru() {
       email: teacher.email || "",
       password: "", // Tidak tampilkan password lama
       akses: teacher.akses || ["ABSENSI", "JADWAL"],
+      wali_kelas_dari: teacher.wali_kelas_dari || "",
     });
     setIsModalOpen(true);
   };
@@ -259,6 +264,7 @@ export function DashboardUnitGuru() {
       email: "",
       password: "",
       akses: ["ABSENSI", "JADWAL"],
+      wali_kelas_dari: "",
     });
     setSubmitError("");
     setShowPassword(false);
@@ -286,7 +292,7 @@ export function DashboardUnitGuru() {
         <div>
           <h2 className="text-2xl font-bold tracking-tight text-gray-900">Data Guru & Ustadz</h2>
           <p className="text-gray-500 text-sm mt-1">
-            Kelola data tenaga pendidik khusus di unit {activeRole?.lembaga.nama}.
+            Kelola data tenaga pendidik khusus di unit {formatNamaLembaga(activeRole?.lembaga.nama)}.
             {isSMP && <span className="text-emerald-600 font-medium"> • Bisa mendaftarkan akun guru</span>}
           </p>
         </div>
@@ -328,7 +334,7 @@ export function DashboardUnitGuru() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="jabatan">Jabatan <span className="text-red-500">*</span></Label>
-                  <Input id="jabatan" placeholder="Misal: Guru, Wali Kelas" value={formData.jabatan} onChange={e => setFormData({...formData, jabatan: e.target.value})} required />
+                  <Input id="jabatan" placeholder="Misal: Guru, Kepala Sekolah" value={formData.jabatan} onChange={e => setFormData({...formData, jabatan: e.target.value})} required />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="status">Status</Label>
@@ -342,6 +348,12 @@ export function DashboardUnitGuru() {
                     <option value="NON-AKTIF">Non-Aktif</option>
                   </select>
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="wali_kelas">Wali Kelas Dari (Opsional)</Label>
+                <Input id="wali_kelas" placeholder="Misal: 7A, 8B" value={formData.wali_kelas_dari} onChange={e => setFormData({...formData, wali_kelas_dari: e.target.value})} />
+                <p className="text-[11px] text-gray-500">Jika diisi, guru ini akan mendapat akses rekap kehadiran khusus kelas tersebut.</p>
               </div>
 
               {/* === SECTION AKUN LOGIN — Khusus SMP === */}
@@ -489,6 +501,11 @@ export function DashboardUnitGuru() {
                       </TableCell>
                       <TableCell>
                         <p className="text-sm text-gray-700">{teacher.jabatan}</p>
+                        {teacher.wali_kelas_dari && (
+                          <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-100 border-none text-[9px] font-bold mt-1 px-1.5 py-0">
+                            Wali Kelas: {teacher.wali_kelas_dari}
+                          </Badge>
+                        )}
                       </TableCell>
                       {isSMP && (
                         <TableCell>

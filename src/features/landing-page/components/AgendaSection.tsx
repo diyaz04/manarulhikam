@@ -5,7 +5,7 @@ export function AgendaSection() {
   const agendaList = [
     {
       id: 1,
-      nama_kegiatan: "Parenting Class TK Manarul Hikam",
+      nama_kegiatan: "Parenting Class TK IT Manarul Hikam",
       tanggal_angka: "25",
       tanggal_bulan: "MEI",
       detail_waktu: "Sabtu, 25 Mei 2024",

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
+import { formatNamaLembaga } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -102,7 +103,7 @@ export function DashboardYayasanLembaga() {
             <CardHeader className="bg-gray-50 border-b">
               <div className="flex justify-between items-center">
                 <div>
-                  <CardTitle className="text-lg text-emerald-900">{lembaga.nama}</CardTitle>
+                  <CardTitle className="text-lg text-emerald-900">{formatNamaLembaga(lembaga.nama)}</CardTitle>
                   <CardDescription>Kode Unit: {lembaga.kode}</CardDescription>
                 </div>
                 {successId === lembaga.id && (
@@ -124,7 +125,7 @@ export function DashboardYayasanLembaga() {
                       value={lembaga.deskripsi || ""} 
                       onChange={(e) => handleUpdateField(lembaga.id, "deskripsi", e.target.value)}
                       className="flex min-h-[120px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-emerald-500"
-                      placeholder={`Deskripsi untuk ${lembaga.nama}...`}
+                      placeholder={`Deskripsi untuk ${formatNamaLembaga(lembaga.nama)}...`}
                     />
                   </div>
                   <div className="space-y-2">

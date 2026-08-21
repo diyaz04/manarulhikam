@@ -188,15 +188,39 @@ export function DashboardUnitInputAgenda() {
     }
   }, [schedules, tanggal]);
 
+  const [lastMateri, setLastMateri] = useState<string>("");
+
   const openModal = async (schedule: Schedule) => {
     setSelectedSchedule(schedule.id);
     setMateri("");
+    setLastMateri("Loading...");
     setFotoUrl("");
     setSelectedFile(null);
     setStatusKehadiranGuru("TEPAT_WAKTU");
     setSubmitError("");
     setSubmitSuccess(false);
     
+    // Fetch last materi
+    try {
+      const { data: lastAgenda } = await supabase
+        .from('agenda_mengajar')
+        .select('materi, tanggal, jadwal:schedules!inner(mata_pelajaran, kelas)')
+        .eq('guru_id', selectedTeacher)
+        .eq('jadwal.mata_pelajaran', schedule.mata_pelajaran)
+        .eq('jadwal.kelas', schedule.kelas)
+        .order('tanggal', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (lastAgenda && lastAgenda.materi) {
+        setLastMateri(`(Tgl ${lastAgenda.tanggal}): ${lastAgenda.materi}`);
+      } else {
+        setLastMateri("Belum ada riwayat materi sebelumnya.");
+      }
+    } catch (err) {
+      setLastMateri("Gagal memuat riwayat materi.");
+    }
+
     // Fetch students for this class
     await fetchStudentsByKelas(schedule.kelas);
     setIsModalOpen(true);
@@ -560,6 +584,10 @@ export function DashboardUnitInputAgenda() {
                 <div className="space-y-2">
                   <Label>Materi / Kegiatan</Label>
                   <Input placeholder="Isi materi yang diajarkan" value={materi} onChange={(e) => setMateri(e.target.value)} required />
+                  <div className="mt-1 p-2 bg-blue-50 border border-blue-100 rounded-md">
+                    <p className="text-[10px] text-blue-600 font-semibold mb-0.5">Materi Terakhir (Pertemuan Sebelumnya):</p>
+                    <p className="text-xs text-blue-800">{lastMateri}</p>
+                  </div>
                 </div>
 
                 <div className="space-y-2">

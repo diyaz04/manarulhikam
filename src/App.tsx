@@ -23,6 +23,7 @@ import { DashboardYayasanFasilitas } from "@/features/dashboard/yayasan/Dashboar
 import { DashboardUnitSiswa } from "@/features/dashboard/unit/DashboardUnitSiswa";
 import { DashboardUnitAlumni } from "@/features/dashboard/unit/DashboardUnitAlumni";
 import { DashboardUnitGuru } from "@/features/dashboard/unit/DashboardUnitGuru";
+import { DashboardGuruKehadiranKelasku } from "@/features/dashboard/guru/DashboardGuruKehadiranKelasku";
 import { DashboardGuruIndex } from "@/features/dashboard/guru/DashboardGuruIndex";
 import { DashboardUnitJadwal } from "@/features/dashboard/unit/DashboardUnitJadwal";
 import { DashboardUnitInputAgenda } from "@/features/dashboard/unit/DashboardUnitInputAgenda";
@@ -52,6 +53,7 @@ function App() {
           <Route path="/smp" element={<UnitLandingPage unitCode="SMP" />} />
           <Route path="/sma" element={<UnitLandingPage unitCode="SMA" />} />
           <Route path="/pesantren" element={<UnitLandingPage unitCode="PONTREN" />} />
+          <Route path="/majlis" element={<UnitLandingPage unitCode="MAJLIS" />} />
 
           {/* SPMB Route */}
           <Route path="/spmb/:lembagaCode" element={<PublicSpmb />} />
@@ -84,6 +86,7 @@ function App() {
               <Route path="guru/jadwal" element={<DashboardUnitJadwal />} />
               <Route path="guru/agenda" element={<DashboardUnitInputAgenda />} />
               <Route path="guru/rekap-siswa" element={<DashboardUnitKehadiranSiswa />} />
+              <Route path="guru/kehadiran-kelasku" element={<DashboardGuruKehadiranKelasku />} />
 
               {/* Unit Academic Routes */}
               <Route path="unit/siswa" element={<DashboardUnitSiswa />} />

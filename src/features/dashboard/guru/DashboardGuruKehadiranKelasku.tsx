@@ -24,19 +24,16 @@ const MONTHS = [
   "Juli", "Agustus", "September", "Oktober", "November", "Desember"
 ];
 
-export function DashboardUnitKehadiranSiswa() {
+export function DashboardGuruKehadiranKelasku() {
   const { activeRole, user } = useAuth();
   
   // Base State
   const [activeYear, setActiveYear] = useState<any>(null);
-  const [classes, setClasses] = useState<string[]>([]);
+  const [kelas, setKelas] = useState<string>("");
   const [loading, setLoading] = useState(true);
   
   // Filter State
-  const [selectedClass, setSelectedClass] = useState<string>("");
   const [recapType, setRecapType] = useState<'HARIAN' | 'BULANAN' | 'SEMESTER'>('BULANAN');
-  
-  // Date State
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
@@ -46,18 +43,18 @@ export function DashboardUnitKehadiranSiswa() {
   const [loadingData, setLoadingData] = useState(false);
 
   useEffect(() => {
-    if (activeRole?.lembaga_id) {
+    if (activeRole?.lembaga_id && user?.id) {
       fetchBaseData();
     }
-  }, [activeRole]);
+  }, [activeRole, user]);
 
   useEffect(() => {
-    if (activeRole?.lembaga_id && activeYear && selectedClass) {
+    if (activeRole?.lembaga_id && activeYear && kelas) {
       fetchReport();
     } else {
       setReportData([]);
     }
-  }, [selectedClass, recapType, selectedDate, selectedMonth, selectedYear]);
+  }, [kelas, recapType, selectedDate, selectedMonth, selectedYear]);
 
   const fetchBaseData = async () => {
     try {
@@ -73,19 +70,16 @@ export function DashboardUnitKehadiranSiswa() {
         
       setActiveYear(yearData || null);
 
-      // 2. Get distinct classes
-      const { data: classData } = await supabase
-        .from('students')
-        .select('kelas')
+      // 2. Cek wali kelas
+      const { data: teacherData } = await supabase
+        .from('teachers')
+        .select('wali_kelas_dari')
+        .eq('user_id', user!.id)
         .eq('lembaga_id', activeRole!.lembaga_id)
-        .order('kelas', { ascending: true });
-        
-      if (classData) {
-        const uniqueClasses = Array.from(new Set(classData.map(c => c.kelas))).filter(Boolean);
-        setClasses(uniqueClasses as string[]);
-        if (uniqueClasses.length > 0) {
-          setSelectedClass(uniqueClasses[0] as string);
-        }
+        .single();
+
+      if (teacherData?.wali_kelas_dari) {
+        setKelas(teacherData.wali_kelas_dari);
       }
     } catch (err) {
       console.error("Error fetching base data:", err);
@@ -95,7 +89,7 @@ export function DashboardUnitKehadiranSiswa() {
   };
 
   const fetchReport = async () => {
-    if (!activeYear || !selectedClass) return;
+    if (!activeYear || !kelas) return;
     
     try {
       setLoadingData(true);
@@ -104,7 +98,7 @@ export function DashboardUnitKehadiranSiswa() {
         .from('students')
         .select('id, nama, nisn')
         .eq('lembaga_id', activeRole!.lembaga_id)
-        .eq('kelas', selectedClass)
+        .eq('kelas', kelas)
         .in('status', ['AKTIF'])
         .order('nama', { ascending: true });
         
@@ -117,84 +111,7 @@ export function DashboardUnitKehadiranSiswa() {
       
       const studentIds = studentsData.map(s => s.id);
       
-      // LOGIKA KHUSUS GURU: Hanya melihat rekap dari jam pelajaran yang dia ajar sendiri
-      if (activeRole?.role === 'GURU') {
-        const { data: teacherData } = await supabase.from('teachers').select('id').eq('user_id', user!.id).eq('lembaga_id', activeRole!.lembaga_id).single();
-        if (!teacherData) return;
-
-        let query = supabase
-          .from('absensi_siswa')
-          .select(`
-            student_id,
-            status,
-            agenda:agenda_mengajar!inner (
-              tanggal,
-              teacher_id,
-              jadwal:schedules!inner (
-                academic_year_id
-              )
-            )
-          `)
-          .eq('agenda.lembaga_id', activeRole!.lembaga_id)
-          .eq('agenda.jadwal.academic_year_id', activeYear.id)
-          .eq('agenda.teacher_id', teacherData.id)
-          .in('student_id', studentIds);
-
-        if (recapType === 'HARIAN') {
-          query = query.eq('agenda.tanggal', selectedDate);
-        } else if (recapType === 'BULANAN') {
-          const startDate = new Date(selectedYear, selectedMonth - 1, 1).toISOString();
-          const endDate = new Date(selectedYear, selectedMonth, 0, 23, 59, 59).toISOString();
-          query = query.gte('agenda.tanggal', startDate).lte('agenda.tanggal', endDate);
-        }
-
-        const { data: absensiData, error: absensiError } = await query;
-        if (absensiError) throw absensiError;
-
-        const statsMap = new Map();
-        studentsData.forEach(s => {
-          statsMap.set(s.id, { ...s, hadir: 0, izin: 0, sakit: 0, alfa: 0, total: 0 });
-        });
-
-        (absensiData || []).forEach(abs => {
-          const std = statsMap.get(abs.student_id);
-          if (std) {
-            std.total += 1;
-            if (abs.status === 'HADIR') std.hadir += 1;
-            else if (abs.status === 'IZIN') std.izin += 1;
-            else if (abs.status === 'SAKIT') std.sakit += 1;
-            else if (abs.status === 'ALFA') std.alfa += 1;
-          }
-        });
-
-        const finalReport = Array.from(statsMap.values()).map(s => {
-          const persentase = s.total > 0 ? ((s.hadir / s.total) * 100).toFixed(1) : "0.0";
-          return { ...s, persentase };
-        });
-
-        setReportData(finalReport);
-        setLoadingData(false);
-        return;
-      }
-
-      // LOGIKA ADMIN: HARIAN vs BULANAN/SEMESTER
       if (recapType === 'HARIAN') {
-        const { data: absensiSiswa } = await supabase
-          .from('absensi_siswa')
-          .select(`
-            student_id,
-            status,
-            agenda:agenda_mengajar!inner (
-              tanggal,
-              jadwal:schedules!inner (
-                mapel, jam_mulai, jam_selesai
-              )
-            )
-          `)
-          .eq('agenda.lembaga_id', activeRole!.lembaga_id)
-          .eq('agenda.tanggal', selectedDate)
-          .in('student_id', studentIds);
-          
         const { data: absensiHarian } = await supabase
           .from('absensi_harian_siswa')
           .select('student_id, status')
@@ -205,37 +122,9 @@ export function DashboardUnitKehadiranSiswa() {
         absensiHarian?.forEach(ah => harianMap.set(ah.student_id, ah.status));
 
         const finalReport = studentsData.map(s => {
-          const studentAbsensi = (absensiSiswa || []).filter(a => a.student_id === s.id);
-          
-          let counts = { HADIR: 0, IZIN: 0, SAKIT: 0, ALFA: 0 };
-          studentAbsensi.forEach(a => counts[a.status as keyof typeof counts]++);
-          
-          let rekomendasi = 'HADIR';
-          let maxCount = -1;
-          for (const [status, count] of Object.entries(counts)) {
-            if (count > maxCount) {
-              maxCount = count;
-              rekomendasi = status;
-            }
-          }
-          if (maxCount === 0) rekomendasi = '-';
-
-          // Urutkan berdasarkan jam mulai
-          const detailJam = studentAbsensi.map(a => {
-            const agenda = a.agenda as any;
-            return {
-              mapel: agenda.jadwal.mapel,
-              waktu: `${agenda.jadwal.jam_mulai}-${agenda.jadwal.jam_selesai}`,
-              status: a.status,
-              jam_mulai: agenda.jadwal.jam_mulai
-            };
-          }).sort((a, b) => a.jam_mulai.localeCompare(b.jam_mulai));
-
           return {
             ...s,
-            detailJam,
-            rekomendasi,
-            keputusanHarian: harianMap.get(s.id) || ''
+            keputusanHarian: harianMap.get(s.id) || '-'
           };
         });
         setReportData(finalReport);
@@ -288,26 +177,6 @@ export function DashboardUnitKehadiranSiswa() {
     }
   };
 
-  const handleSaveKeputusan = async (studentId: string, status: string) => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      const { error } = await supabase
-        .from('absensi_harian_siswa')
-        .upsert({
-          student_id: studentId,
-          tanggal: selectedDate,
-          status: status,
-          decided_by: user?.id
-        }, { onConflict: 'student_id, tanggal' });
-
-      if (error) throw error;
-
-      setReportData(prev => prev.map(s => s.id === studentId ? { ...s, keputusanHarian: status } : s));
-    } catch (err: any) {
-      alert("Gagal menyimpan keputusan harian: " + err.message);
-    }
-  };
-
   const handleExportExcel = () => {
     if (reportData.length === 0) return;
     
@@ -316,28 +185,15 @@ export function DashboardUnitKehadiranSiswa() {
     else if (recapType === 'BULANAN') title = `Bulanan_${MONTHS[selectedMonth - 1]}_${selectedYear}`;
     else title = `Semester_${activeYear?.nama.replace(/\s+/g, '_')}`;
     
-    const fileName = `Rekap_Absensi_Kelas_${selectedClass}_${title}.xlsx`;
+    const fileName = `Rekap_Absensi_Kelas_${kelas}_${title}.xlsx`;
 
     let formattedData: any = [];
-    if (activeRole?.role === 'GURU') {
+    if (recapType === 'HARIAN') {
       formattedData = reportData.map((s, index) => ({
         "No": index + 1,
         "NISN": s.nisn,
         "Nama Siswa / Santri": s.nama,
-        "Hadir (H)": s.hadir,
-        "Izin (I)": s.izin,
-        "Sakit (S)": s.sakit,
-        "Alfa (A)": s.alfa,
-        "Total Sesi": s.total,
-        "Persentase (%)": parseFloat(s.persentase)
-      }));
-    } else if (recapType === 'HARIAN') {
-      formattedData = reportData.map((s, index) => ({
-        "No": index + 1,
-        "NISN": s.nisn,
-        "Nama Siswa / Santri": s.nama,
-        "Rekomendasi Sistem": s.rekomendasi,
-        "Keputusan Admin": s.keputusanHarian
+        "Keputusan Harian": s.keputusanHarian
       }));
     } else {
       formattedData = reportData.map((s, index) => ({
@@ -355,16 +211,26 @@ export function DashboardUnitKehadiranSiswa() {
 
     const worksheet = XLSX.utils.json_to_sheet(formattedData);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, `Kelas ${selectedClass}`);
+    XLSX.utils.book_append_sheet(workbook, worksheet, `Kelas ${kelas}`);
     XLSX.writeFile(workbook, fileName);
   };
+
+  if (!loading && !kelas) {
+    return (
+      <div className="max-w-6xl mx-auto py-12 text-center">
+        <AlertCircle className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+        <h2 className="text-xl font-bold text-gray-700">Akses Ditolak</h2>
+        <p className="text-gray-500 mt-2">Anda bukan wali kelas dari kelas manapun.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-gray-900">Rekap Kehadiran Siswa</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-gray-900">Rekap Kehadiran Kelas {kelas}</h1>
         <p className="text-gray-500 text-sm mt-1">
-          Pantau statistik kehadiran siswa di Tahun Ajaran aktif berdasarkan kelas dan periode.
+          Pantau statistik kehadiran harian (keputusan final sekolah) untuk siswa perwalian Anda.
         </p>
       </div>
 
@@ -379,23 +245,12 @@ export function DashboardUnitKehadiranSiswa() {
         </div>
       )}
 
-      {activeYear && (
+      {activeYear && kelas && (
         <Card className="border-0 shadow-sm rounded-3xl overflow-hidden">
           <CardHeader className="bg-white border-b pb-6">
             <div className="flex flex-col md:flex-row gap-4 items-start md:items-end justify-between">
               <div className="space-y-4">
                 <div className="flex flex-wrap gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Kelas</label>
-                    <select 
-                      className="h-10 px-3 rounded-xl border border-gray-200 text-sm bg-gray-50 font-medium min-w-[120px]"
-                      value={selectedClass}
-                      onChange={e => setSelectedClass(e.target.value)}
-                    >
-                      {classes.map(c => <option key={c} value={c}>{c}</option>)}
-                    </select>
-                  </div>
-                  
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Tipe Rekap</label>
                     <select 
@@ -403,19 +258,9 @@ export function DashboardUnitKehadiranSiswa() {
                       value={recapType}
                       onChange={e => setRecapType(e.target.value as any)}
                     >
-                      {activeRole?.role === 'GURU' ? (
-                        <>
-                          <option value="HARIAN">Harian (Pelajaran Saya)</option>
-                          <option value="BULANAN">Bulanan (Pelajaran Saya)</option>
-                          <option value="SEMESTER">Satu Semester (Pelajaran Saya)</option>
-                        </>
-                      ) : (
-                        <>
-                          <option value="HARIAN">Harian (Input Admin)</option>
-                          <option value="BULANAN">Bulanan</option>
-                          <option value="SEMESTER">Satu Semester (Tahun Ajaran)</option>
-                        </>
-                      )}
+                      <option value="HARIAN">Harian (Keputusan Sekolah)</option>
+                      <option value="BULANAN">Bulanan</option>
+                      <option value="SEMESTER">Satu Semester</option>
                     </select>
                   </div>
 
@@ -485,21 +330,19 @@ export function DashboardUnitKehadiranSiswa() {
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader className="bg-white">
-                    {recapType === 'HARIAN' && activeRole?.role !== 'GURU' ? (
+                    {recapType === 'HARIAN' ? (
                       <TableRow>
                         <TableHead className="pl-6 w-12 text-center">No</TableHead>
                         <TableHead>Nama Siswa</TableHead>
                         <TableHead>NISN</TableHead>
-                        <TableHead className="min-w-[200px]">Jejak Jam Pelajaran (Guru)</TableHead>
-                        <TableHead className="text-center bg-gray-50">Rekomendasi</TableHead>
-                        <TableHead className="text-center bg-emerald-50 text-emerald-800">Keputusan Harian</TableHead>
+                        <TableHead className="text-center bg-emerald-50 text-emerald-800">Status Harian (Keputusan Sekolah)</TableHead>
                       </TableRow>
                     ) : (
                       <TableRow>
                         <TableHead className="pl-6 w-12 text-center">No</TableHead>
                         <TableHead>Nama Siswa</TableHead>
                         <TableHead>NISN</TableHead>
-                        <TableHead className="text-center">Total Sesi Kehadiran</TableHead>
+                        <TableHead className="text-center">Total Hari Bersekolah</TableHead>
                         <TableHead className="text-center bg-emerald-50 text-emerald-700">Hadir</TableHead>
                         <TableHead className="text-center bg-blue-50 text-blue-700">Izin</TableHead>
                         <TableHead className="text-center bg-orange-50 text-orange-700">Sakit</TableHead>
@@ -515,54 +358,16 @@ export function DashboardUnitKehadiranSiswa() {
                         <TableCell className="font-medium text-gray-900">{s.nama}</TableCell>
                         <TableCell className="text-gray-500">{s.nisn || '-'}</TableCell>
                         
-                        {recapType === 'HARIAN' && activeRole?.role !== 'GURU' ? (
-                          <>
-                            <TableCell>
-                              <div className="flex flex-wrap gap-2 py-2">
-                                {s.detailJam?.length > 0 ? s.detailJam.map((dj: any, i: number) => (
-                                  <div key={i} className="flex flex-col text-[10px] border border-gray-200 rounded p-1.5 bg-gray-50/80">
-                                    <span className="font-semibold text-gray-700">{dj.mapel}</span>
-                                    <div className="flex justify-between items-center gap-3">
-                                      <span className="text-gray-400">{dj.waktu}</span>
-                                      <span className={`font-black ${
-                                        dj.status === 'HADIR' ? 'text-emerald-600' :
-                                        dj.status === 'IZIN' ? 'text-blue-600' :
-                                        dj.status === 'SAKIT' ? 'text-orange-600' : 'text-red-600'
-                                      }`}>{dj.status}</span>
-                                    </div>
-                                  </div>
-                                )) : <span className="text-xs text-gray-400 italic">Belum ada absen dari guru hari ini</span>}
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-center bg-gray-50/50">
-                              {s.rekomendasi !== '-' ? (
-                                <span className={`inline-flex px-2 py-1 rounded text-xs font-bold ${
-                                  s.rekomendasi === 'HADIR' ? 'bg-emerald-100 text-emerald-800' :
-                                  s.rekomendasi === 'IZIN' ? 'bg-blue-100 text-blue-800' :
-                                  s.rekomendasi === 'SAKIT' ? 'bg-orange-100 text-orange-800' : 'bg-red-100 text-red-800'
-                                }`}>{s.rekomendasi}</span>
-                              ) : <span className="text-xs text-gray-400">-</span>}
-                            </TableCell>
-                            <TableCell className="text-center bg-emerald-50/30">
-                              <select 
-                                className={`text-sm border rounded-lg px-2 py-1.5 font-bold outline-none cursor-pointer ${
-                                  !s.keputusanHarian ? 'border-dashed border-gray-400 text-gray-500 bg-white' :
-                                  s.keputusanHarian === 'HADIR' ? 'bg-emerald-100 border-emerald-200 text-emerald-700' :
-                                  s.keputusanHarian === 'IZIN' ? 'bg-blue-100 border-blue-200 text-blue-700' :
-                                  s.keputusanHarian === 'SAKIT' ? 'bg-orange-100 border-orange-200 text-orange-700' :
-                                  'bg-red-100 border-red-200 text-red-700'
-                                }`}
-                                value={s.keputusanHarian || ''}
-                                onChange={(e) => handleSaveKeputusan(s.id, e.target.value)}
-                              >
-                                <option value="" disabled>Pilih Status</option>
-                                <option value="HADIR">Hadir</option>
-                                <option value="IZIN">Izin</option>
-                                <option value="SAKIT">Sakit</option>
-                                <option value="ALFA">Alfa</option>
-                              </select>
-                            </TableCell>
-                          </>
+                        {recapType === 'HARIAN' ? (
+                          <TableCell className="text-center">
+                            {s.keputusanHarian !== '-' ? (
+                              <span className={`inline-flex px-2 py-1 rounded text-xs font-bold ${
+                                s.keputusanHarian === 'HADIR' ? 'bg-emerald-100 text-emerald-800' :
+                                s.keputusanHarian === 'IZIN' ? 'bg-blue-100 text-blue-800' :
+                                s.keputusanHarian === 'SAKIT' ? 'bg-orange-100 text-orange-800' : 'bg-red-100 text-red-800'
+                              }`}>{s.keputusanHarian}</span>
+                            ) : <span className="text-xs text-gray-400">- Belum Diputuskan -</span>}
+                          </TableCell>
                         ) : (
                           <>
                             <TableCell className="text-center font-medium">{s.total}</TableCell>

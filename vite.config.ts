@@ -11,7 +11,11 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'logo-yayasan.png', 'pwa-192x192.png', 'pwa-512x512.png'],
+      injectRegister: 'auto',
+      includeAssets: ['favicon.svg', 'logo-yayasan.png', 'pwa-192x192.png', 'pwa-512x512.png'],
+      devOptions: {
+        enabled: true
+      },
       manifest: {
         name: 'Sistem Informasi Manarul Hikam',
         short_name: 'Manarul Hikam',
@@ -19,19 +23,20 @@ export default defineConfig({
         theme_color: '#059669', // emerald-600
         background_color: '#ffffff',
         display: 'standalone',
+        start_url: '/',
         icons: [
           {
-            src: 'pwa-192x192.png',
+            src: '/pwa-192x192.png',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: 'pwa-512x512.png',
+            src: '/pwa-512x512.png',
             sizes: '512x512',
             type: 'image/png'
           },
           {
-            src: 'pwa-512x512.png',
+            src: '/pwa-512x512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable'

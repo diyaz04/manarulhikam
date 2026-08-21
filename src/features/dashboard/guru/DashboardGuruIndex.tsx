@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { formatNamaLembaga } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Calendar, Clock, BookOpen, Users } from "lucide-react";
+import { Calendar, Clock, BookOpen, Users, Camera } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
@@ -120,17 +121,31 @@ export function DashboardGuruIndex() {
               {teacherName}.
             </h1>
             <p className={`text-[11px] sm:text-xs mb-4 max-w-sm leading-relaxed ${greeting === "Selamat Malam" ? 'text-indigo-200' : 'text-slate-600'}`}>
-              Selamat datang di Portal Guru {activeRole?.lembaga.nama}. Mari kita mulai hari ini dengan semangat berbagi ilmu.
+              Selamat datang di Portal Guru {formatNamaLembaga(activeRole?.lembaga.nama)}. Mari kita mulai hari ini dengan semangat berbagi ilmu.
             </p>
             
-            <div className={`inline-flex items-center gap-2 px-3 py-1.5 backdrop-blur-sm rounded-lg border ${greeting === "Selamat Malam" ? 'bg-indigo-950/50 border-indigo-500/30' : 'bg-white/50 border-white/50'}`}>
-              <div className={`w-6 h-6 rounded-md flex items-center justify-center shadow-inner ${greeting === "Selamat Malam" ? 'bg-indigo-500 text-white' : 'bg-emerald-500 text-white'}`}>
-                <Users className="w-3 h-3" />
+            <div className="flex flex-wrap gap-3">
+              <div className={`inline-flex items-center gap-2 px-3 py-1.5 backdrop-blur-sm rounded-lg border ${greeting === "Selamat Malam" ? 'bg-indigo-950/50 border-indigo-500/30' : 'bg-white/50 border-white/50'}`}>
+                <div className={`w-6 h-6 rounded-md flex items-center justify-center shadow-inner ${greeting === "Selamat Malam" ? 'bg-indigo-500 text-white' : 'bg-emerald-500 text-white'}`}>
+                  <Users className="w-3 h-3" />
+                </div>
+                <div>
+                  <p className={`text-[8px] font-bold uppercase tracking-widest ${greeting === "Selamat Malam" ? 'text-indigo-300' : 'text-emerald-800'}`}>Akses Akun</p>
+                  <p className={`text-[10px] font-black capitalize leading-none ${greeting === "Selamat Malam" ? 'text-white' : 'text-slate-900'}`}>Guru</p>
+                </div>
               </div>
-              <div>
-                <p className={`text-[8px] font-bold uppercase tracking-widest ${greeting === "Selamat Malam" ? 'text-indigo-300' : 'text-emerald-800'}`}>Akses Akun</p>
-                <p className={`text-[10px] font-black capitalize leading-none ${greeting === "Selamat Malam" ? 'text-white' : 'text-slate-900'}`}>Guru</p>
-              </div>
+
+              {teacher?.wali_kelas_dari && (
+                <div className={`inline-flex items-center gap-2 px-3 py-1.5 backdrop-blur-sm rounded-lg border ${greeting === "Selamat Malam" ? 'bg-indigo-950/50 border-indigo-500/30' : 'bg-white/50 border-white/50'}`}>
+                  <div className={`w-6 h-6 rounded-md flex items-center justify-center shadow-inner ${greeting === "Selamat Malam" ? 'bg-indigo-500 text-white' : 'bg-amber-500 text-white'}`}>
+                    <BookOpen className="w-3 h-3" />
+                  </div>
+                  <div>
+                    <p className={`text-[8px] font-bold uppercase tracking-widest ${greeting === "Selamat Malam" ? 'text-indigo-300' : 'text-amber-800'}`}>Wali Kelas</p>
+                    <p className={`text-[10px] font-black capitalize leading-none ${greeting === "Selamat Malam" ? 'text-white' : 'text-slate-900'}`}>{teacher.wali_kelas_dari}</p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -158,7 +173,7 @@ export function DashboardGuruIndex() {
             <div>
               <h1 className="text-2xl md:text-3xl font-bold mb-1.5">Ahlan wa Sahlan, {teacher?.nama || user?.user_metadata?.full_name}!</h1>
               <p className="text-emerald-50 text-sm md:text-base opacity-90 max-w-xl">
-                Selamat datang di Portal Guru {activeRole?.lembaga.nama}. Mari kita mulai hari ini dengan semangat berbagi ilmu.
+                Selamat datang di Portal Guru {formatNamaLembaga(activeRole?.lembaga.nama)}. Mari kita mulai hari ini dengan semangat berbagi ilmu.
               </p>
             </div>
           </div>
@@ -170,6 +185,16 @@ export function DashboardGuruIndex() {
 
       {/* Quick Access Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        
+        <Link to="/dashboard/guru/kedatangan" className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center gap-3 hover:shadow-md transition-all group cursor-pointer">
+          <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <Camera className="w-6 h-6 text-blue-600" />
+          </div>
+          <div>
+            <p className="font-bold text-gray-900 text-sm">Kedatangan</p>
+            <p className="text-[10px] text-gray-500">Absen Selfie / Lokasi</p>
+          </div>
+        </Link>
         
         <Link to="/dashboard/guru/agenda" className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center gap-3 hover:shadow-md transition-all group cursor-pointer">
           <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -193,17 +218,15 @@ export function DashboardGuruIndex() {
           </Link>
         )}
 
-        {hasAkses('KEHADIRAN_SISWA') && (
-          <Link to="/dashboard/guru/rekap-siswa" className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center gap-3 hover:shadow-md transition-all group cursor-pointer">
-            <div className="w-12 h-12 rounded-full bg-orange-50 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Users className="w-6 h-6 text-orange-600" />
-            </div>
-            <div>
-              <p className="font-bold text-gray-900 text-sm">Rekap Siswa</p>
-              <p className="text-[10px] text-gray-500">Laporan kehadiran</p>
-            </div>
-          </Link>
-        )}
+        <Link to="/dashboard/guru/rekap-siswa" className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center gap-3 hover:shadow-md transition-all group cursor-pointer">
+          <div className="w-12 h-12 rounded-full bg-orange-50 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <Users className="w-6 h-6 text-orange-600" />
+          </div>
+          <div>
+            <p className="font-bold text-gray-900 text-sm">Rekap Siswa</p>
+            <p className="text-[10px] text-gray-500">Laporan kehadiran</p>
+          </div>
+        </Link>
       </div>
 
       {/* Today's Schedule */}

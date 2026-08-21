@@ -5,8 +5,8 @@ export function BeritaSection() {
   const beritaList = [
     {
       id: 1,
-      judul: "Siswa SMA Manarul Hikam Raih Prestasi di Olimpiade Sains Nasional 2024",
-      excerpt: "Alhamdulillah, siswa SMA Manarul Hikam meraih medali emas pada bidang Matematika tingkat nasional...",
+      judul: "Siswa SMA IT Manarul Hikam Raih Prestasi di Olimpiade Sains Nasional 2024",
+      excerpt: "Alhamdulillah, siswa SMA IT Manarul Hikam meraih medali emas pada bidang Matematika tingkat nasional...",
       tanggal: "20 Mei 2024",
       gambar: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=400&auto=format&fit=crop",
     },
@@ -19,8 +19,8 @@ export function BeritaSection() {
     },
     {
       id: 3,
-      judul: "Wisuda Tahfidz SMP Manarul Hikam Angkatan ke-5",
-      excerpt: "Sebanyak 50 siswa SMP Manarul Hikam berhasil menyelesaikan hafalan Al-Qur'an juz 30 dalam wisuda tahfidz...",
+      judul: "Wisuda Tahfidz SMP IT Manarul Hikam Angkatan ke-5",
+      excerpt: "Sebanyak 50 siswa SMP IT Manarul Hikam berhasil menyelesaikan hafalan Al-Qur'an juz 30 dalam wisuda tahfidz...",
       tanggal: "10 Mei 2024",
       gambar: "https://images.unsplash.com/photo-1541829070764-84a7d30dd3f3?q=80&w=400&auto=format&fit=crop",
     }

@@ -40,7 +40,7 @@ export function LembagaSection() {
   const lembagaList = [
     {
       id: "tk",
-      nama: "TK Manarul Hikam",
+      nama: "TK IT Manarul Hikam",
       deskripsi: "Pendidikan anak usia dini berbasis karakter dan nilai-nilai Islam.",
       gambar: "https://images.unsplash.com/photo-1587691592099-24045742c181?q=80&w=800&auto=format&fit=crop",
       logo: "/logo-tk.png",
@@ -48,7 +48,7 @@ export function LembagaSection() {
     },
     {
       id: "smp",
-      nama: "SMP Manarul Hikam",
+      nama: "SMP IT Manarul Hikam",
       deskripsi: "Sekolah menengah pertama dengan kurikulum terpadu dan pembinaan karakter islami.",
       gambar: "https://images.unsplash.com/photo-1577896851231-70ef18881754?q=80&w=800&auto=format&fit=crop",
       logo: "/logo-smp.png",
@@ -56,7 +56,7 @@ export function LembagaSection() {
     },
     {
       id: "sma",
-      nama: "SMA Manarul Hikam",
+      nama: "SMA IT Manarul Hikam",
       deskripsi: "Sekolah menengah atas dengan fokus pada akademik, karakter, dan keterampilan.",
       gambar: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=800&auto=format&fit=crop",
       logo: "/logo-sma.png",
@@ -69,6 +69,14 @@ export function LembagaSection() {
       gambar: "https://images.unsplash.com/photo-1585036156171-384164a8c675?q=80&w=800&auto=format&fit=crop",
       logo: "/logo-pesantren.png",
       link: "/pesantren"
+    },
+    {
+      id: "majlis",
+      nama: "Majlis Ta'lim Manarul Hikam",
+      deskripsi: "Pusat kajian Islam dan pembinaan keagamaan masyarakat.",
+      gambar: "https://images.unsplash.com/photo-1596484552834-6a58f850e0a1?q=80&w=800&auto=format&fit=crop",
+      logo: "/logo-majlis.png",
+      link: "/majlis"
     }
   ];
 

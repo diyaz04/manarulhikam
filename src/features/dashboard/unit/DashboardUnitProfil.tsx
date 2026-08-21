@@ -126,7 +126,7 @@ export function DashboardUnitProfil() {
               <Input 
                 value={formData.nama}
                 onChange={e => setFormData({...formData, nama: e.target.value})}
-                placeholder="Contoh: SMP Manarul Hikam"
+                placeholder="Contoh: SMP IT Manarul Hikam"
                 required
               />
             </div>

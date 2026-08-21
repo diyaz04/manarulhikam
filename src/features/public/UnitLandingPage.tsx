@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { formatNamaLembaga } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
 import { 
   MapPin, 
@@ -70,6 +71,7 @@ export function UnitLandingPage({ unitCode }: { unitCode: string }) {
     }
   };
 
+
   // Theme configuration based on Unit
   const getTheme = () => {
     switch (unitCode) {
@@ -125,6 +127,19 @@ export function UnitLandingPage({ unitCode }: { unitCode: string }) {
           heroPath: '/hero_malam.jpg',
           nuansaAnak: false
         };
+      case 'MAJLIS':
+        return {
+          primary: 'teal-600',
+          hover: 'teal-700',
+          light: 'teal-50',
+          bg: 'bg-teal-600',
+          text: 'text-teal-600',
+          border: 'border-teal-200',
+          gradient: 'from-teal-600 to-emerald-500',
+          logoPath: '/logo-majlis.png',
+          heroPath: '/hero_malam.jpg',
+          nuansaAnak: false
+        };
       default:
         return {
           primary: 'emerald-600',
@@ -168,7 +183,7 @@ export function UnitLandingPage({ unitCode }: { unitCode: string }) {
               </div>
               <div className="flex flex-col">
                 <span className={`font-bold text-xl ${theme.text} leading-none tracking-tight`}>
-                  {profile?.nama_situs || lembaga.nama}
+                  {formatNamaLembaga(profile?.nama_situs || lembaga.nama)}
                 </span>
                 <span className="text-xs text-gray-500 font-medium tracking-widest mt-1">YAYASAN MANARUL HIKAM</span>
               </div>
@@ -266,7 +281,7 @@ export function UnitLandingPage({ unitCode }: { unitCode: string }) {
                   Masa Depan Cerah
                 </h1>
                 <h1 className={`text-4xl md:text-5xl lg:text-6xl font-black ${theme.text} tracking-tight leading-[1.1] mb-6 ${theme.nuansaAnak ? 'font-comic' : ''}`}>
-                  Dimulai Dari {lembaga.nama}
+                  Dimulai Dari {formatNamaLembaga(lembaga.nama)}
                 </h1>
                 
                 {/* Decorative Line */}
@@ -368,22 +383,38 @@ export function UnitLandingPage({ unitCode }: { unitCode: string }) {
           <div className={`relative ${theme.bg} pt-4 pb-12 px-4 sm:px-6 lg:px-8 flex justify-center z-20 lg:mt-24 lg:rounded-t-[3rem]`}>
             {/* The Floating Card equivalent for Units */}
             <div className="w-full max-w-5xl bg-white rounded-3xl p-6 sm:p-8 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)] relative -mt-8 sm:-mt-12 lg:-mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-              <div>
-                <h3 className={`text-2xl font-bold ${theme.text}`}>A</h3>
-                <p className="text-xs text-gray-500 mt-1">Akreditasi</p>
-              </div>
-              <div>
-                <h3 className={`text-2xl font-bold ${theme.text}`}>100+</h3>
-                <p className="text-xs text-gray-500 mt-1">Siswa Aktif</p>
-              </div>
-              <div>
-                <h3 className={`text-2xl font-bold ${theme.text}`}>20+</h3>
-                <p className="text-xs text-gray-500 mt-1">Guru & Staf</p>
-              </div>
-              <div>
-                <h3 className={`text-2xl font-bold ${theme.text}`}>Beragam</h3>
-                <p className="text-xs text-gray-500 mt-1">Ekstrakurikuler</p>
-              </div>
+              {(() => {
+                let stats = [];
+                if (unitCode === 'PONTREN') {
+                  stats = [
+                    { value: '200+', label: 'Santri Aktif' },
+                    { value: '20+', label: 'Ustadz Pembimbing' },
+                    { value: 'Beragam', label: 'Kegiatan Kepesantrenan' },
+                    { value: '24 Jam', label: 'Pengawasan Asrama' },
+                  ];
+                } else if (unitCode === 'MAJLIS') {
+                  stats = [
+                    { value: '500+', label: 'Jumlah Jamaah' },
+                    { value: 'Rutin', label: 'Pengajian Mingguan' },
+                    { value: 'Terbuka', label: 'Untuk Umum' },
+                    { value: 'Nyaman', label: 'Fasilitas Beribadah' },
+                  ];
+                } else {
+                  stats = [
+                    { value: 'A', label: 'Akreditasi' },
+                    { value: '100+', label: 'Siswa Aktif' },
+                    { value: '20+', label: 'Guru & Staf' },
+                    { value: 'Beragam', label: 'Ekstrakurikuler' },
+                  ];
+                }
+                
+                return stats.map((stat, idx) => (
+                  <div key={idx}>
+                    <h3 className={`text-2xl font-bold ${theme.text}`}>{stat.value}</h3>
+                    <p className="text-xs text-gray-500 mt-1">{stat.label}</p>
+                  </div>
+                ));
+              })()}
             </div>
           </div>
         </section>
@@ -530,7 +561,7 @@ export function UnitLandingPage({ unitCode }: { unitCode: string }) {
                   <img src={profile?.logo_url || theme.logoPath} alt="Logo" className="w-full h-full object-contain" />
                 </div>
                 <span className="font-bold text-xl text-white">
-                  {profile?.nama_situs || lembaga.nama}
+                  {formatNamaLembaga(profile?.nama_situs || lembaga.nama)}
                 </span>
               </div>
               <p className="text-gray-400 mb-6 leading-relaxed max-w-sm">
@@ -584,7 +615,7 @@ export function UnitLandingPage({ unitCode }: { unitCode: string }) {
           </div>
           
           <div className="pt-8 border-t border-gray-800 text-center text-gray-500 text-sm">
-            <p>&copy; {new Date().getFullYear()} {profile?.nama_situs || lembaga.nama}. Hak Cipta Dilindungi.</p>
+            <p>&copy; {new Date().getFullYear()} {formatNamaLembaga(profile?.nama_situs || lembaga.nama)}. Hak Cipta Dilindungi.</p>
           </div>
         </div>
       </footer>

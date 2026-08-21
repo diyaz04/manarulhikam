@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
+import { formatNamaLembaga } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -112,7 +113,7 @@ export function DashboardYayasanVerifikasi() {
           jenis: 'KREDIT',
           jumlah: payment.nominal_dibayar,
           tanggal: new Date().toISOString().split('T')[0],
-          keterangan: `Pembayaran ${payment.bills.jenis_tagihan_final} an. ${payment.bills.students.nama} (${payment.bills.students.lembaga.nama})`,
+          keterangan: `Pembayaran ${payment.bills.jenis_tagihan_final} an. ${payment.bills.students.nama} (${formatNamaLembaga(payment.bills.students.lembaga.nama)})`,
           bukti_url: payment.bukti_transfer_url,
           created_by: user!.id
         }]);
@@ -182,7 +183,7 @@ export function DashboardYayasanVerifikasi() {
                     <TableCell className="whitespace-nowrap text-sm">{new Date(p.tanggal_bayar).toLocaleString('id-ID')}</TableCell>
                     <TableCell>
                       <div className="font-bold">{p.bills.students.nama}</div>
-                      <div className="text-xs text-gray-600">{p.bills.students.nisn} - {p.bills.students.lembaga.nama}</div>
+                      <div className="text-xs text-gray-600">{p.bills.students.nisn} - {formatNamaLembaga(p.bills.students.lembaga.nama)}</div>
                     </TableCell>
                     <TableCell>
                       <div className="font-medium">{p.bills.jenis_tagihan_final}</div>
@@ -226,7 +227,7 @@ export function DashboardYayasanVerifikasi() {
                     <TableCell className="whitespace-nowrap text-sm text-gray-500">{new Date(p.tanggal_bayar).toLocaleDateString('id-ID')}</TableCell>
                     <TableCell>
                       <div className="font-medium">{p.bills.students.nama}</div>
-                      <div className="text-xs text-gray-500">{p.bills.students.lembaga.nama}</div>
+                      <div className="text-xs text-gray-500">{formatNamaLembaga(p.bills.students.lembaga.nama)}</div>
                     </TableCell>
                     <TableCell className="text-sm">{p.bills.jenis_tagihan_final}</TableCell>
                     <TableCell className="text-right font-medium">{formatRupiah(p.nominal_dibayar)}</TableCell>

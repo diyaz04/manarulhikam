@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
+import { formatNamaLembaga } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -346,7 +347,7 @@ export function DashboardUnitJadwal() {
         <div>
           <h2 className="text-2xl font-bold tracking-tight text-gray-900">{isGuru ? "Jadwal Saya" : "Jadwal & Agenda Mengajar"}</h2>
           <p className="text-gray-500 text-sm mt-1">
-            {isGuru ? "Lihat jadwal mengajar Anda di sini." : `Kelola jadwal pelajaran untuk ${activeRole?.lembaga.nama}.`}
+            {isGuru ? "Lihat jadwal mengajar Anda di sini." : `Kelola jadwal pelajaran untuk ${formatNamaLembaga(activeRole?.lembaga.nama)}.`}
           </p>
         </div>
         {!isGuru && (

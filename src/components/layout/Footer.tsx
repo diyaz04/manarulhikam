@@ -55,10 +55,11 @@ export function Footer() {
           <div>
             <h3 className="text-white font-bold mb-6 text-lg">Lembaga</h3>
             <ul className="space-y-3 text-sm text-emerald-200">
-              <li><Link to="/tk" className="hover:text-emerald-400 transition-colors">TK Manarul Hikam</Link></li>
-              <li><Link to="/smp" className="hover:text-emerald-400 transition-colors">SMP Manarul Hikam</Link></li>
-              <li><Link to="/sma" className="hover:text-emerald-400 transition-colors">SMA Manarul Hikam</Link></li>
+              <li><Link to="/tk" className="hover:text-emerald-400 transition-colors">TK IT Manarul Hikam</Link></li>
+              <li><Link to="/smp" className="hover:text-emerald-400 transition-colors">SMP IT Manarul Hikam</Link></li>
+              <li><Link to="/sma" className="hover:text-emerald-400 transition-colors">SMA IT Manarul Hikam</Link></li>
               <li><Link to="/pesantren" className="hover:text-emerald-400 transition-colors">Pondok Pesantren</Link></li>
+              <li><Link to="/majlis" className="hover:text-emerald-400 transition-colors">Majlis Ta'lim Manarul Hikam</Link></li>
             </ul>
           </div>
 
