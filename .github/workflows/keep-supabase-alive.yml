@@ -1,0 +1,27 @@
+name: Keep Supabase Alive
+
+on:
+  schedule:
+    # Berjalan pada pukul 00:00 UTC setiap 3 hari sekali
+    # (Supabase Free Tier akan di-pause setelah 7 hari tanpa aktivitas)
+    - cron: '0 0 */3 * *'
+  # Memungkinkan workflow ini dijalankan secara manual dari tab Actions di GitHub
+  workflow_dispatch:
+
+jobs:
+  ping-supabase:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Ping Supabase API
+        run: |
+          echo "Melakukan ping ke Supabase untuk mencegah pause otomatis..."
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X GET "${{ secrets.SUPABASE_URL }}/rest/v1/" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}")
+          
+          if [ "$HTTP_STATUS" -eq 200 ]; then
+            echo "✅ Berhasil melakukan ping ke Supabase (Status: $HTTP_STATUS)"
+          else
+            echo "⚠️ Ping selesai, namun mengembalikan status HTTP $HTTP_STATUS"
+          fi
