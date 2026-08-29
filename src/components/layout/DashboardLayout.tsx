@@ -235,6 +235,7 @@ export function DashboardLayout() {
           { name: "Verifikasi Absensi", href: "/dashboard/unit/absensi", icon: FileCheck2 },
           { name: "Kehadiran Siswa", href: "/dashboard/unit/kehadiran-siswa", icon: UserCheck },
           { name: "Hitung Gaji Guru", href: "/dashboard/unit/penggajian", icon: BadgeDollarSign },
+          { name: "Arsip Dokumen", href: "/dashboard/unit/arsip", icon: FileText },
         ]
       });
     }

@@ -38,6 +38,7 @@ import { DashboardPengaturanAkun } from "@/features/dashboard/pengaturan/Dashboa
 import { PublicSpmb } from "@/features/landing-page/PublicSpmb";
 import { DashboardGuruKedatangan } from "@/features/dashboard/guru/DashboardGuruKedatangan";
 import { DashboardUnitVerifikasiKedatangan } from "@/features/dashboard/unit/DashboardUnitVerifikasiKedatangan";
+import { DashboardUnitArsip } from "@/features/dashboard/unit/DashboardUnitArsip";
 
 function App() {
   return (
@@ -102,6 +103,7 @@ function App() {
               <Route path="unit/absensi" element={<DashboardUnitAbsensi />} />
               <Route path="unit/kehadiran-siswa" element={<DashboardUnitKehadiranSiswa />} />
               <Route path="unit/penggajian" element={<DashboardUnitPenggajian />} />
+              <Route path="unit/arsip" element={<DashboardUnitArsip />} />
               
               <Route path="berita" element={<div className="p-4">Berita Unit Dashboard (Coming Soon)</div>} />
               <Route path="agenda" element={<div className="p-4">Agenda Unit Dashboard (Coming Soon)</div>} />
