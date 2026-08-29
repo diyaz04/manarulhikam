@@ -129,7 +129,7 @@ export function DashboardUnitKehadiranSiswa() {
             status,
             agenda:agenda_mengajar!inner (
               tanggal,
-              teacher_id,
+              guru_id,
               jadwal:schedules!inner (
                 academic_year_id
               )
@@ -137,7 +137,7 @@ export function DashboardUnitKehadiranSiswa() {
           `)
           .eq('agenda.lembaga_id', activeRole!.lembaga_id)
           .eq('agenda.jadwal.academic_year_id', activeYear.id)
-          .eq('agenda.teacher_id', teacherData.id)
+          .eq('agenda.guru_id', teacherData.id)
           .in('student_id', studentIds);
 
         if (recapType === 'HARIAN') {
@@ -187,7 +187,7 @@ export function DashboardUnitKehadiranSiswa() {
             agenda:agenda_mengajar!inner (
               tanggal,
               jadwal:schedules!inner (
-                mapel, jam_mulai, jam_selesai
+                mata_pelajaran, jam_ke_mulai, jam_ke_selesai
               )
             )
           `)
@@ -224,12 +224,14 @@ export function DashboardUnitKehadiranSiswa() {
           const detailJam = studentAbsensi.map(a => {
             const agenda = a.agenda as any;
             return {
-              mapel: agenda.jadwal.mapel,
-              waktu: `${agenda.jadwal.jam_mulai}-${agenda.jadwal.jam_selesai}`,
+              mapel: agenda.jadwal.mata_pelajaran,
+              waktu: agenda.jadwal.jam_ke_mulai === agenda.jadwal.jam_ke_selesai 
+                ? `Jam ke-${agenda.jadwal.jam_ke_mulai}` 
+                : `Jam ke-${agenda.jadwal.jam_ke_mulai}-${agenda.jadwal.jam_ke_selesai}`,
               status: a.status,
-              jam_mulai: agenda.jadwal.jam_mulai
+              jam_mulai: agenda.jadwal.jam_ke_mulai
             };
-          }).sort((a, b) => a.jam_mulai.localeCompare(b.jam_mulai));
+          }).sort((a, b) => a.jam_mulai - b.jam_mulai);
 
           return {
             ...s,
