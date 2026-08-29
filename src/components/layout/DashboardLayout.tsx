@@ -45,6 +45,7 @@ export function DashboardLayout() {
   const [currentDate, setCurrentDate] = useState("");
 
   const [pendingCount, setPendingCount] = useState(0);
+  const [pendingKedatanganCount, setPendingKedatanganCount] = useState(0);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -94,8 +95,52 @@ export function DashboardLayout() {
           supabase.removeChannel(channel);
         };
       }
+    } else if (activeRole?.lembaga.kode === 'SMP') {
+      let channelAgenda: any;
+      let channelKedatangan: any;
+
+      // Agenda Absensi
+      if (location.pathname === '/dashboard/unit/absensi') {
+        setPendingCount(0);
+      } else {
+        const fetchPendingAgenda = async () => {
+          const { count } = await supabase
+            .from('agenda_mengajar')
+            .select('*', { count: 'exact', head: true })
+            .eq('status', 'PENDING')
+            .eq('lembaga_id', activeRole.lembaga_id);
+          setPendingCount(count || 0);
+        };
+        fetchPendingAgenda();
+        channelAgenda = supabase.channel('agenda_changes')
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'agenda_mengajar' }, fetchPendingAgenda)
+          .subscribe();
+      }
+
+      // Verifikasi Kedatangan
+      if (location.pathname === '/dashboard/unit/verifikasi-kedatangan') {
+        setPendingKedatanganCount(0);
+      } else {
+        const fetchPendingKedatangan = async () => {
+          const { count } = await supabase
+            .from('absensi_kedatangan_guru')
+            .select('*', { count: 'exact', head: true })
+            .eq('status_verifikasi', 'PENDING')
+            .eq('lembaga_id', activeRole.lembaga_id);
+          setPendingKedatanganCount(count || 0);
+        };
+        fetchPendingKedatangan();
+        channelKedatangan = supabase.channel('kedatangan_changes')
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'absensi_kedatangan_guru' }, fetchPendingKedatangan)
+          .subscribe();
+      }
+
+      return () => {
+        if (channelAgenda) supabase.removeChannel(channelAgenda);
+        if (channelKedatangan) supabase.removeChannel(channelKedatangan);
+      };
     }
-  }, [isYayasan, location.pathname]);
+  }, [isYayasan, location.pathname, activeRole]);
 
   const [teacherAccess, setTeacherAccess] = useState<string[]>([]);
   const [isWaliKelas, setIsWaliKelas] = useState(false);
@@ -231,8 +276,8 @@ export function DashboardLayout() {
         items: [
           { name: "Monitoring Agenda", href: "/dashboard/unit/monitoring-agenda", icon: Calendar },
           { name: "Input Agenda Susulan", href: "/dashboard/unit/input-agenda", icon: ClipboardList },
-          { name: "Verifikasi Kedatangan", href: "/dashboard/unit/verifikasi-kedatangan", icon: Camera },
-          { name: "Verifikasi Absensi", href: "/dashboard/unit/absensi", icon: FileCheck2 },
+          { name: "Verifikasi Kedatangan", href: "/dashboard/unit/verifikasi-kedatangan", icon: Camera, badge: pendingKedatanganCount },
+          { name: "Verifikasi Absensi", href: "/dashboard/unit/absensi", icon: FileCheck2, badge: pendingCount },
           { name: "Kehadiran Siswa", href: "/dashboard/unit/kehadiran-siswa", icon: UserCheck },
           { name: "Hitung Gaji Guru", href: "/dashboard/unit/penggajian", icon: BadgeDollarSign },
           { name: "Arsip Dokumen", href: "/dashboard/unit/arsip", icon: FileText },
@@ -399,28 +444,58 @@ export function DashboardLayout() {
               <DropdownMenuTrigger asChild>
                 <button className="p-2 rounded-full bg-white border border-gray-100 shadow-sm text-gray-400 hover:text-emerald-500 transition-colors relative">
                   <Bell className="w-5 h-5 md:w-4 md:h-4" />
-                  {pendingCount > 0 && (
+                  {(pendingCount > 0 || pendingKedatanganCount > 0) && (
                     <span className="absolute top-0 right-0 -mt-1 -mr-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 border border-white text-[9px] font-bold text-white shadow-sm">
-                      {pendingCount > 9 ? '9+' : pendingCount}
+                      {(pendingCount + pendingKedatanganCount) > 9 ? '9+' : (pendingCount + pendingKedatanganCount)}
                     </span>
                   )}
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-72 p-4 rounded-xl shadow-lg border-gray-100">
+              <DropdownMenuContent align="end" className="w-72 p-4 rounded-xl shadow-lg border-gray-100 max-h-[80vh] overflow-y-auto">
                 <div className="flex items-center gap-2 mb-3">
                   <Bell className="w-4 h-4 text-emerald-600" />
                   <h4 className="font-bold text-sm text-gray-900">Notifikasi Baru</h4>
                 </div>
-                {pendingCount > 0 ? (
-                  <div className="space-y-3">
-                    <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-100">
-                      <p className="text-sm text-emerald-800 font-medium">Ada <span className="font-bold text-red-600">{pendingCount} pembayaran</span> yang perlu segera diverifikasi.</p>
-                    </div>
-                    <Link to="/dashboard/yayasan/verifikasi" className="block w-full">
-                      <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-xs shadow-sm h-9">
-                        Buka Halaman Verifikasi
-                      </Button>
-                    </Link>
+                {(pendingCount > 0 || pendingKedatanganCount > 0) ? (
+                  <div className="space-y-4">
+                    {isYayasan && pendingCount > 0 && (
+                      <div className="space-y-2">
+                        <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-100">
+                          <p className="text-sm text-emerald-800 font-medium">Ada <span className="font-bold text-red-600">{pendingCount} pembayaran</span> yang perlu segera diverifikasi.</p>
+                        </div>
+                        <Link to="/dashboard/yayasan/verifikasi" className="block w-full">
+                          <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-xs shadow-sm h-9">
+                            Buka Verifikasi Pembayaran
+                          </Button>
+                        </Link>
+                      </div>
+                    )}
+                    
+                    {!isYayasan && pendingCount > 0 && (
+                      <div className="space-y-2">
+                        <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-100">
+                          <p className="text-sm text-emerald-800 font-medium">Ada <span className="font-bold text-red-600">{pendingCount} agenda absensi guru</span> yang belum diverifikasi.</p>
+                        </div>
+                        <Link to="/dashboard/unit/absensi" className="block w-full">
+                          <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-xs shadow-sm h-9">
+                            Buka Verifikasi Absensi
+                          </Button>
+                        </Link>
+                      </div>
+                    )}
+
+                    {!isYayasan && pendingKedatanganCount > 0 && (
+                      <div className="space-y-2">
+                        <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
+                          <p className="text-sm text-blue-800 font-medium">Ada <span className="font-bold text-red-600">{pendingKedatanganCount} absen kedatangan guru</span> yang perlu diperiksa.</p>
+                        </div>
+                        <Link to="/dashboard/unit/verifikasi-kedatangan" className="block w-full">
+                          <Button className="w-full bg-blue-600 hover:bg-blue-700 text-xs shadow-sm h-9">
+                            Buka Verifikasi Kedatangan
+                          </Button>
+                        </Link>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <p className="text-sm text-gray-500 text-center py-4 bg-gray-50 rounded-lg border border-dashed border-gray-200">
