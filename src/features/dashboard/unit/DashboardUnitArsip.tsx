@@ -196,8 +196,6 @@ export function DashboardUnitArsip() {
     doc.title.toLowerCase().includes(categorySearch.toLowerCase())
   );
 
-  const displayDocuments = globalSearchResults !== null ? globalSearchResults : filteredDocuments;
-
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
