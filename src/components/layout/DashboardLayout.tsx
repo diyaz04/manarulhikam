@@ -37,6 +37,8 @@ import {
   UserCircle,
   Camera
 } from "lucide-react";
+type SidebarItemType = { name: string; href: string; icon: any; badge?: number };
+type SidebarGroupType = { title: string; items: SidebarItemType[] };
 
 export function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -160,7 +162,7 @@ export function DashboardLayout() {
     }
   }, [activeRole, user]);
 
-  const sidebarGroups = isYayasan ? [
+  const sidebarGroups: SidebarGroupType[] = isYayasan ? [
     {
       title: "MENU UTAMA",
       items: [
@@ -251,7 +253,7 @@ export function DashboardLayout() {
       ];
     }
 
-    const groups = [
+    const groups: SidebarGroupType[] = [
       {
         title: "MENU UTAMA",
         items: [
