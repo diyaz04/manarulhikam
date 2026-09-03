@@ -121,6 +121,12 @@ export function DashboardPengaturanAkun() {
         throw updateError;
       }
 
+      // Re-authenticate with new password to ensure valid session
+      await supabase.auth.signInWithPassword({
+        email: user.email!,
+        password: newPassword,
+      });
+
       setPwdMessage({ type: 'success', text: 'Password berhasil diubah.' });
       setOldPassword("");
       setNewPassword("");
