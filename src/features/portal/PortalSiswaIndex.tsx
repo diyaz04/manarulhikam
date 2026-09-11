@@ -37,8 +37,8 @@ export function PortalSiswaIndex() {
     if (url) setBuktiUrl(url);
   };
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSearch = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (!searchQuery.trim()) return;
 
     try {
