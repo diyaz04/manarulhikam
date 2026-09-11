@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Loader2, Save, User, Lock, AlertCircle, CheckCircle2, Camera } from "lucide-react";
+import { Loader2, Save, User, Lock, AlertCircle, CheckCircle2 } from "lucide-react";
+import { CloudinaryUpload } from "@/components/common/CloudinaryUpload";
 
 export function DashboardPengaturanAkun() {
   const { user, activeRole } = useAuth();
@@ -138,14 +139,7 @@ export function DashboardPengaturanAkun() {
     }
   };
 
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
 
-    // For this prototype, use object URL
-    const objectUrl = URL.createObjectURL(file);
-    setAvatarUrl(objectUrl);
-  };
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
@@ -176,23 +170,16 @@ export function DashboardPengaturanAkun() {
 
               <div className="space-y-2">
                 <Label>Foto Profil</Label>
-                <div className="flex items-center gap-4">
-                  <div className="w-20 h-20 rounded-full bg-gray-100 border border-gray-200 overflow-hidden flex items-center justify-center shrink-0">
-                    {avatarUrl ? (
-                      <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
-                    ) : (
-                      <User className="w-8 h-8 text-gray-400" />
-                    )}
+                  <div className="flex flex-col gap-3">
+                    <CloudinaryUpload 
+                      defaultImage={avatarUrl} 
+                      onUploadSuccess={(url) => {
+                        setAvatarUrl(url);
+                      }}
+                      buttonText="Pilih Foto"
+                    />
+                    <p className="text-[11px] text-gray-500">Maks. 2MB. Format: JPG, PNG.</p>
                   </div>
-                  <div className="flex-1">
-                    <Input type="file" accept="image/*" id="avatar-upload" className="hidden" onChange={handlePhotoUpload} />
-                    <Label htmlFor="avatar-upload" className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 cursor-pointer">
-                      <Camera className="w-4 h-4 mr-2" />
-                      Pilih Foto
-                    </Label>
-                    <p className="text-xs text-gray-500 mt-2">Pilih gambar untuk profil Anda.</p>
-                  </div>
-                </div>
               </div>
 
               <div className="space-y-2">

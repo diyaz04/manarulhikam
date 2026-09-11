@@ -1,6 +1,6 @@
 import { ArrowRight, BookOpen, Users, Globe } from "lucide-react";
 
-export function HeroSection() {
+export function HeroSection({ profile }: { profile?: any }) {
   return (
     <section className="relative pt-24 overflow-hidden bg-white">
       {/* Background Dot Pattern (Top Right) */}
@@ -37,15 +37,15 @@ export function HeroSection() {
               Sistem Terpadu
             </h1>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-emerald-600 tracking-tight leading-[1.1] mb-6">
-              Yayasan<br/>Manarul Hikam
+              {profile?.nama_yayasan || "Yayasan Manarul Hikam"}
             </h1>
             
             {/* Decorative Line */}
             <div className="w-12 h-1 bg-emerald-500 mb-6 rounded-full"></div>
 
             {/* Subtitle */}
-            <p className="text-base md:text-lg text-gray-500 mb-8 max-w-sm lg:max-w-lg leading-relaxed font-medium">
-              Membangun generasi berilmu, berakhlak mulia, dan berdaya saing global berlandaskan nilai-nilai Islam.
+            <p className="text-base md:text-lg text-gray-500 mb-8 max-w-sm lg:max-w-lg leading-relaxed font-medium whitespace-pre-wrap">
+              {profile?.hero_subtitle || "Membangun generasi berilmu, berakhlak mulia, dan berdaya saing global berlandaskan nilai-nilai Islam."}
             </p>
             
             {/* Buttons */}
@@ -83,7 +83,7 @@ export function HeroSection() {
             {/* Main Building Image */}
             <div className="relative rounded-[2rem] overflow-hidden shadow-[0_20px_50px_-12px_rgba(5,150,105,0.3)] aspect-[4/3] border-4 border-white">
               <img 
-                src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=1200&auto=format&fit=crop" 
+                src={profile?.hero_image_url || "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=1200&auto=format&fit=crop"} 
                 alt="Graduation" 
                 className="w-full h-full object-cover"
               />

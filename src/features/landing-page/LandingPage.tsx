@@ -1,3 +1,5 @@
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { HeroSection } from "./components/HeroSection";
@@ -8,12 +10,22 @@ import { AgendaSection } from "./components/AgendaSection";
 import { FasilitasSection } from "./components/FasilitasSection";
 
 export function LandingPage() {
+  const [profile, setProfile] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const { data } = await supabase.from("site_profile").select("*").limit(1).single();
+      if (data) setProfile(data);
+    };
+    fetchProfile();
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <Navbar />
       <main className="flex-grow pt-20"> {/* Add padding top because navbar is fixed */}
-        <HeroSection />
-        <ProfilSection />
+        <HeroSection profile={profile} />
+        <ProfilSection profile={profile} />
         <LembagaSection />
         
         {/* Berita & Agenda digabung dalam 1 baris (Grid 2 Kolom) */}
@@ -28,7 +40,7 @@ export function LandingPage() {
 
         <FasilitasSection />
       </main>
-      <Footer />
+      <Footer profile={profile} />
     </div>
   );
 }
