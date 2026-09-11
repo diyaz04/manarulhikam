@@ -43,31 +43,18 @@ export function PortalSiswaIndex() {
 
     try {
       setLoading(true);
-      // 1. Get Student Profiles by NISN or NIK (might return multiple if registered in multiple units)
-      const { data: studentsData, error: studentErr } = await supabase
-        .from('students')
-        .select(`id, nama, nisn, nik, lembaga (nama)`)
-        .or(`nisn.eq.${searchQuery},nik.eq.${searchQuery}`);
       
-      if (studentErr || !studentsData || studentsData.length === 0) {
+      const { data, error } = await supabase.rpc('get_portal_student', { search_query: searchQuery });
+      
+      if (error || !data) {
         setStudent(null);
         alert("Siswa tidak ditemukan. Periksa kembali NISN atau NIK.");
         return;
       }
 
-      // Merge multiple records into one cohesive view
-      const studentIds = studentsData.map(s => s.id);
-      const combinedLembagaNames = Array.from(new Set(studentsData.map(s => (s.lembaga as any).nama))).join(", ");
-      
-      const mergedStudent = {
-        ...studentsData[0],
-        lembaga: { nama: combinedLembagaNames }
-      };
-
-      setStudent(mergedStudent as unknown as Student);
-
-      // Fetch Data across all their student_ids
-      await fetchData(studentIds);
+      setStudent(data.student as unknown as Student);
+      setBills(data.bills || []);
+      setPayments(data.payments || []);
       
       // Fetch Rekening
       const { data: rekData } = await supabase.from('rekening_yayasan').select('*').eq('is_active', true);
@@ -79,25 +66,6 @@ export function PortalSiswaIndex() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const fetchData = async (studentIds: string[]) => {
-    // 2. Get Bills
-    const { data: billsData } = await supabase
-      .from('bills')
-      .select('*')
-      .in('student_id', studentIds)
-      .order('created_at', { ascending: true });
-    setBills(billsData || []);
-
-    // 3. Get Payments History
-    const { data: paymentsData } = await supabase
-      .from('payments')
-      .select('*, bills!inner(student_id, jenis_tagihan_final)')
-      .in('bills.student_id', studentIds)
-      .order('tanggal_bayar', { ascending: false });
-    
-    setPayments((paymentsData as any) || []);
   };
 
   const formatRupiah = (angka: number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
@@ -152,7 +120,7 @@ export function PortalSiswaIndex() {
         alert("Pembayaran berhasil disubmit dan menunggu verifikasi Bendahara!");
         setIsPayModalOpen(false);
         setSelectedBillIds([]);
-        if (student) fetchData([student.id]);
+        if (student) handleSearch();
       }
     } catch (err: any) {
       alert("Gagal mensubmit pembayaran: " + err.message);

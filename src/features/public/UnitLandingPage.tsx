@@ -45,20 +45,19 @@ export function UnitLandingPage({ unitCode }: { unitCode: string }) {
       if (!lembagaData) return;
       setLembaga(lembagaData);
 
-      // 2. Fetch all related data concurrently
+      // 2. Fetch all related data concurrently (site_profile applies globally to yayasan, so no lembaga_id filter)
       const [profileRes, beritaRes, agendaRes, fasilitasesRes] = await Promise.all([
-        supabase.from('site_profile').select('*').eq('lembaga_id', lembagaData.id).single(),
+        supabase.from('site_profile').select('*').limit(1).single(),
         supabase.from('berita').select('*').eq('lembaga_id', lembagaData.id).order('created_at', { ascending: false }).limit(3),
         supabase.from('agenda_kegiatan').select('*').eq('lembaga_id', lembagaData.id).order('tanggal_mulai', { ascending: true }).limit(3),
         supabase.from('fasilitas').select('*').eq('lembaga_id', lembagaData.id).limit(4),
       ]);
 
       setProfile(profileRes.data || {
-        nama_situs: lembagaData.nama,
-        deskripsi_singkat: "Selamat datang di website resmi " + lembagaData.nama,
+        nama_yayasan: "Yayasan",
         alamat: "Alamat belum diatur",
         email: "email@contoh.com",
-        telepon: "080000000",
+        kontak: "080000000",
       });
       setBerita(beritaRes.data || []);
       setAgenda(agendaRes.data || []);
@@ -288,14 +287,14 @@ export function UnitLandingPage({ unitCode }: { unitCode: string }) {
                 <div className={`w-12 h-1 ${theme.bg} mb-6 rounded-full`}></div>
 
                 {/* Subtitle */}
-                <p className="text-base md:text-lg text-gray-500 mb-8 max-w-sm lg:max-w-lg leading-relaxed font-medium">
-                  {profile?.deskripsi_singkat || "Kami berkomitmen memberikan pendidikan terbaik yang mengintegrasikan ilmu pengetahuan umum dan nilai-nilai keislaman."}
+                <p className="text-base md:text-lg text-gray-500 mb-8 max-w-sm lg:max-w-lg leading-relaxed font-medium whitespace-pre-wrap">
+                  {lembaga?.deskripsi || "Kami berkomitmen memberikan pendidikan terbaik yang mengintegrasikan ilmu pengetahuan umum dan nilai-nilai keislaman."}
                 </p>
                 
                 {/* Buttons */}
                 <div className="flex flex-row flex-wrap items-center gap-4">
                   <a 
-                    href={`https://wa.me/${profile?.telepon?.replace(/[^0-9]/g, '')}`} 
+                    href={`https://wa.me/${profile?.kontak?.replace(/[^0-9]/g, '')}`} 
                     target="_blank" 
                     rel="noreferrer"
                     className={`inline-flex items-center justify-center px-5 py-3 text-sm font-semibold rounded-xl text-white ${theme.bg} hover:${theme.hover} transition-all shadow-lg`}
@@ -320,7 +319,7 @@ export function UnitLandingPage({ unitCode }: { unitCode: string }) {
                 <div className="absolute -top-12 -left-12 z-30">
                   <div className={`w-32 h-32 rounded-full bg-white p-1.5 shadow-2xl flex items-center justify-center overflow-hidden border-4 ${theme.border}`}>
                      <img 
-                      src={profile?.logo_url || theme.logoPath} 
+                      src={lembaga?.logo_url || theme.logoPath} 
                       alt="Logo Lembaga" 
                       className="w-full h-full object-contain rounded-full bg-white p-2"
                     />
@@ -328,7 +327,7 @@ export function UnitLandingPage({ unitCode }: { unitCode: string }) {
                 </div>
 
                 <img 
-                  src={profile?.foto_url || theme.heroPath} 
+                  src={lembaga?.gambar_url || theme.heroPath} 
                   alt="Hero Image" 
                   className="relative rounded-[2rem] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.3)] object-cover aspect-[4/3] w-full border-4 border-white"
                 />
@@ -355,7 +354,7 @@ export function UnitLandingPage({ unitCode }: { unitCode: string }) {
             <div className="absolute top-12 sm:top-16 left-8 sm:left-16 z-30">
               <div className={`w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-white p-1.5 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.4)] flex items-center justify-center overflow-hidden border-4 border-white`}>
                  <img 
-                  src={profile?.logo_url || theme.logoPath} 
+                  src={lembaga?.logo_url || theme.logoPath} 
                   alt="Logo Lembaga" 
                   className="w-full h-full object-contain rounded-full bg-white p-2"
                 />
@@ -365,7 +364,7 @@ export function UnitLandingPage({ unitCode }: { unitCode: string }) {
             {/* Image Area */}
             <div className="relative w-full" style={{ height: '400px' }}>
               <img 
-                src={profile?.foto_url || theme.heroPath} 
+                src={lembaga?.gambar_url || theme.heroPath} 
                 alt="Hero Image" 
                 className="w-full h-full object-cover object-center"
               />
@@ -428,7 +427,7 @@ export function UnitLandingPage({ unitCode }: { unitCode: string }) {
             </div>
             <div className="bg-white rounded-3xl p-8 md:p-12 shadow-sm border border-gray-100">
               <p className="text-gray-700 leading-loose text-lg whitespace-pre-line text-center">
-                {profile?.deskripsi_lengkap || profile?.deskripsi_singkat || "Profil lembaga belum diatur oleh Admin."}
+                {lembaga?.deskripsi || "Profil lembaga belum diatur oleh Admin."}
               </p>
             </div>
           </div>
@@ -558,14 +557,14 @@ export function UnitLandingPage({ unitCode }: { unitCode: string }) {
             <div className="md:col-span-5">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-12 h-12 rounded-lg bg-white p-1 flex items-center justify-center">
-                  <img src={profile?.logo_url || theme.logoPath} alt="Logo" className="w-full h-full object-contain" />
+                  <img src={lembaga?.logo_url || theme.logoPath} alt="Logo" className="w-full h-full object-contain" />
                 </div>
                 <span className="font-bold text-xl text-white">
-                  {formatNamaLembaga(profile?.nama_situs || lembaga.nama)}
+                  {formatNamaLembaga(lembaga?.nama)}
                 </span>
               </div>
-              <p className="text-gray-400 mb-6 leading-relaxed max-w-sm">
-                {profile?.deskripsi_singkat || "Berkomitmen mencetak generasi masa depan yang cerdas, berakhlak mulia, dan berprestasi."}
+              <p className="text-gray-400 mb-6 leading-relaxed max-w-sm whitespace-pre-wrap">
+                {lembaga?.deskripsi || "Berkomitmen mencetak generasi masa depan yang cerdas, berakhlak mulia, dan berprestasi."}
               </p>
               <div className="flex gap-4">
                 {profile?.facebook_url && (
@@ -604,7 +603,7 @@ export function UnitLandingPage({ unitCode }: { unitCode: string }) {
                 </li>
                 <li className="flex items-center gap-3">
                   <Phone className="w-5 h-5 text-gray-500 shrink-0" />
-                  <span>{profile?.telepon || "-"}</span>
+                  <span>{profile?.kontak || "-"}</span>
                 </li>
                 <li className="flex items-center gap-3">
                   <Mail className="w-5 h-5 text-gray-500 shrink-0" />
@@ -615,7 +614,7 @@ export function UnitLandingPage({ unitCode }: { unitCode: string }) {
           </div>
           
           <div className="pt-8 border-t border-gray-800 text-center text-gray-500 text-sm">
-            <p>&copy; {new Date().getFullYear()} {formatNamaLembaga(profile?.nama_situs || lembaga.nama)}. Hak Cipta Dilindungi.</p>
+            <p>&copy; {new Date().getFullYear()} {formatNamaLembaga(lembaga?.nama)}. Hak Cipta Dilindungi.</p>
           </div>
         </div>
       </footer>
