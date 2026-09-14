@@ -6,22 +6,25 @@ import { supabase } from "@/lib/supabase";
 export function LembagaSection() {
   const [activeSpmbs, setActiveSpmbs] = useState<Record<string, any>>({});
 
+  const [dbLembagas, setDbLembagas] = useState<Record<string, any>>({});
+
   useEffect(() => {
-    fetchActiveSpmbs();
+    fetchData();
   }, []);
 
-  const fetchActiveSpmbs = async () => {
+  const fetchData = async () => {
     try {
-      const { data, error } = await supabase
-        .from('spmb_config')
-        .select('*, lembaga:lembaga_id(kode)')
-        .eq('aktif', true);
+      const [spmbRes, lembagaRes] = await Promise.all([
+        supabase.from('spmb_config').select('*, lembaga:lembaga_id(kode)').eq('aktif', true),
+        supabase.from('lembaga').select('*').not('kode', 'eq', 'YAYASAN')
+      ]);
 
-      if (error) throw error;
+      if (spmbRes.error) throw spmbRes.error;
+      if (lembagaRes.error) throw lembagaRes.error;
       
-      if (data) {
+      if (spmbRes.data) {
         const activeMap: Record<string, any> = {};
-        data.forEach(conf => {
+        spmbRes.data.forEach(conf => {
           if (conf.lembaga && conf.lembaga.kode) {
             activeMap[conf.lembaga.kode.toLowerCase()] = conf;
           }
@@ -32,8 +35,19 @@ export function LembagaSection() {
         }
         setActiveSpmbs(activeMap);
       }
+
+      if (lembagaRes.data) {
+        const lembagaMap: Record<string, any> = {};
+        lembagaRes.data.forEach(l => {
+          lembagaMap[l.kode.toLowerCase()] = l;
+        });
+        if (lembagaMap['pontren']) {
+          lembagaMap['pesantren'] = lembagaMap['pontren'];
+        }
+        setDbLembagas(lembagaMap);
+      }
     } catch (err) {
-      console.error("Error fetching active SPMB:", err);
+      console.error("Error fetching data:", err);
     }
   };
 
@@ -89,16 +103,22 @@ export function LembagaSection() {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-          {lembagaList.map((lembaga) => {
-            const spmbConfig = activeSpmbs[lembaga.id];
+          {lembagaList.map((baseLembaga) => {
+            const spmbConfig = activeSpmbs[baseLembaga.id];
+            const dbInfo = dbLembagas[baseLembaga.id];
+            
+            const nama = dbInfo?.nama || baseLembaga.nama;
+            const deskripsi = dbInfo?.deskripsi || baseLembaga.deskripsi;
+            const gambar = dbInfo?.gambar_url || baseLembaga.gambar;
+            const logo = dbInfo?.logo_url || baseLembaga.logo;
 
             return (
-            <div key={lembaga.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all group flex flex-col h-full mt-10">
+            <div key={baseLembaga.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all group flex flex-col h-full mt-10">
               
               <div className="relative h-40 rounded-t-2xl bg-gray-200">
                 <img 
-                  src={lembaga.gambar} 
-                  alt={lembaga.nama} 
+                  src={gambar} 
+                  alt={nama} 
                   className="w-full h-full object-cover rounded-t-2xl"
                 />
                 
@@ -106,8 +126,8 @@ export function LembagaSection() {
                 <div className="absolute -bottom-10 inset-x-0 flex justify-center z-20">
                   <div className="w-20 h-20 bg-white rounded-full p-1 shadow-md border border-gray-100">
                      <img 
-                      src={lembaga.logo} 
-                      alt={`Logo ${lembaga.nama}`} 
+                      src={logo} 
+                      alt={`Logo ${nama}`} 
                       className="w-full h-full object-cover rounded-full"
                     />
                   </div>
@@ -115,9 +135,9 @@ export function LembagaSection() {
               </div>
               
               <div className="pt-14 pb-6 px-6 flex flex-col flex-grow text-center">
-                <h3 className="text-lg font-bold text-gray-900 mb-2">{lembaga.nama}</h3>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">{nama}</h3>
                 <p className="text-gray-600 text-sm mb-6 flex-grow leading-relaxed">
-                  {lembaga.deskripsi}
+                  {deskripsi}
                 </p>
 
                 {/* Tampilkan tombol SPMB jika aktif */}
@@ -127,7 +147,7 @@ export function LembagaSection() {
                       Pendaftaran Dibuka!
                     </p>
                     <Link 
-                      to={`/spmb/${lembaga.id.toUpperCase()}`}
+                      to={`/spmb/${baseLembaga.id.toUpperCase()}`}
                       className="w-full inline-flex items-center justify-center bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl h-10 text-sm font-semibold shadow-sm transition-colors"
                     >
                       <UserPlus className="w-4 h-4 mr-2" />
@@ -137,7 +157,7 @@ export function LembagaSection() {
                 )}
 
                 <Link 
-                  to={lembaga.link}
+                  to={baseLembaga.link}
                   className="inline-flex items-center justify-center text-emerald-600 font-semibold text-sm hover:text-emerald-700 transition-colors"
                 >
                   Lihat Info Lembaga
