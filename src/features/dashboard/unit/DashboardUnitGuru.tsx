@@ -22,6 +22,8 @@ interface Teacher {
   user_id: string | null;
   akses: string[] | null; // ['ABSENSI', 'JADWAL', 'SISWA', etc.]
   wali_kelas_dari: string | null;
+  payroll_rate_id: string | null;
+  payroll_rate?: { nama_rate: string } | null;
   created_at: string;
 }
 
@@ -36,6 +38,7 @@ export function DashboardUnitGuru() {
   const { activeRole } = useAuth();
   const [loading, setLoading] = useState(true);
   const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const [payrollRates, setPayrollRates] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   
   const isSMP = activeRole?.lembaga.kode === 'SMP';
@@ -57,25 +60,41 @@ export function DashboardUnitGuru() {
     password: "",
     akses: ["ABSENSI", "JADWAL"] as string[], // Default akses
     wali_kelas_dari: "",
+    payroll_rate_id: "",
   });
 
   useEffect(() => {
     if (activeRole?.lembaga_id) {
+      fetchPayrollRates();
       fetchTeachers();
     }
   }, [activeRole]);
+
+  const fetchPayrollRates = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('payroll_rates')
+        .select('id, nama_rate, rate_per_jam')
+        .eq('lembaga_id', activeRole!.lembaga_id)
+        .order('created_at', { ascending: true });
+      if (error) throw error;
+      setPayrollRates(data || []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const fetchTeachers = async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
         .from('teachers')
-        .select('*')
+        .select(`*, payroll_rate:payroll_rates(nama_rate)`)
         .eq('lembaga_id', activeRole!.lembaga_id)
         .order('nama', { ascending: true });
 
       if (error) throw error;
-      setTeachers(data || []);
+      setTeachers(data as unknown as Teacher[] || []);
     } catch (err: any) {
       console.error("Error fetching teachers:", err.message);
     } finally {
@@ -98,6 +117,7 @@ export function DashboardUnitGuru() {
           jabatan: formData.jabatan,
           status: formData.status,
           wali_kelas_dari: formData.wali_kelas_dari || null,
+          payroll_rate_id: formData.payroll_rate_id || null,
         };
 
         // Kalau SMP, simpan juga akses
@@ -181,6 +201,7 @@ export function DashboardUnitGuru() {
           jabatan: formData.jabatan,
           status: formData.status,
           wali_kelas_dari: formData.wali_kelas_dari || null,
+          payroll_rate_id: formData.payroll_rate_id || null,
         };
 
         if (isSMP) {
@@ -249,6 +270,7 @@ export function DashboardUnitGuru() {
       password: "", // Tidak tampilkan password lama
       akses: teacher.akses || ["ABSENSI", "JADWAL"],
       wali_kelas_dari: teacher.wali_kelas_dari || "",
+      payroll_rate_id: teacher.payroll_rate_id || "",
     });
     setIsModalOpen(true);
   };
@@ -265,6 +287,7 @@ export function DashboardUnitGuru() {
       password: "",
       akses: ["ABSENSI", "JADWAL"],
       wali_kelas_dari: "",
+      payroll_rate_id: "",
     });
     setSubmitError("");
     setShowPassword(false);
@@ -354,6 +377,22 @@ export function DashboardUnitGuru() {
                 <Label htmlFor="wali_kelas">Wali Kelas Dari (Opsional)</Label>
                 <Input id="wali_kelas" placeholder="Misal: 7A, 8B" value={formData.wali_kelas_dari} onChange={e => setFormData({...formData, wali_kelas_dari: e.target.value})} />
                 <p className="text-[11px] text-gray-500">Jika diisi, guru ini akan mendapat akses rekap kehadiran khusus kelas tersebut.</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="payroll_rate_id">Tipe Tarif Honor</Label>
+                <select 
+                  id="payroll_rate_id"
+                  className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                  value={formData.payroll_rate_id}
+                  onChange={e => setFormData({...formData, payroll_rate_id: e.target.value})}
+                >
+                  <option value="">-- Pilih Tipe Tarif Honor (Opsional) --</option>
+                  {payrollRates.map(rate => (
+                    <option key={rate.id} value={rate.id}>{rate.nama_rate} (Rp {rate.rate_per_jam.toLocaleString('id-ID')}/JP)</option>
+                  ))}
+                </select>
+                <p className="text-[11px] text-gray-500">Besaran per jam yang akan digunakan untuk menghitung gaji (dapat diatur di menu Penggajian).</p>
               </div>
 
               {/* === SECTION AKUN LOGIN — Khusus SMP === */}
@@ -501,11 +540,18 @@ export function DashboardUnitGuru() {
                       </TableCell>
                       <TableCell>
                         <p className="text-sm text-gray-700">{teacher.jabatan}</p>
-                        {teacher.wali_kelas_dari && (
-                          <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-100 border-none text-[9px] font-bold mt-1 px-1.5 py-0">
-                            Wali Kelas: {teacher.wali_kelas_dari}
-                          </Badge>
-                        )}
+                        <div className="flex flex-col gap-1 items-start mt-1">
+                          {teacher.wali_kelas_dari && (
+                            <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-100 border-none text-[9px] font-bold px-1.5 py-0">
+                              Wali Kelas: {teacher.wali_kelas_dari}
+                            </Badge>
+                          )}
+                          {teacher.payroll_rate?.nama_rate && (
+                            <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-100 border-none text-[9px] font-bold px-1.5 py-0">
+                              Tarif: {teacher.payroll_rate.nama_rate}
+                            </Badge>
+                          )}
+                        </div>
                       </TableCell>
                       {isSMP && (
                         <TableCell>

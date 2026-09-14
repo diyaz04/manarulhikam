@@ -34,6 +34,7 @@ import DashboardUnitPengaturanSistem from "@/features/dashboard/unit/DashboardUn
 import { DashboardUnitAbsensi } from "@/features/dashboard/unit/DashboardUnitAbsensi";
 import { DashboardUnitPenggajian } from "@/features/dashboard/unit/DashboardUnitPenggajian";
 import { DashboardUnitKehadiranSiswa } from "@/features/dashboard/unit/DashboardUnitKehadiranSiswa";
+import { DashboardUnitKehadiranGuru } from "@/features/dashboard/unit/DashboardUnitKehadiranGuru";
 import { DashboardPengaturanAkun } from "@/features/dashboard/pengaturan/DashboardPengaturanAkun";
 import { PublicSpmb } from "@/features/landing-page/PublicSpmb";
 import { DashboardGuruKedatangan } from "@/features/dashboard/guru/DashboardGuruKedatangan";
@@ -102,6 +103,7 @@ function App() {
               <Route path="unit/pengaturan-sistem" element={<DashboardUnitPengaturanSistem />} />
               <Route path="unit/absensi" element={<DashboardUnitAbsensi />} />
               <Route path="unit/kehadiran-siswa" element={<DashboardUnitKehadiranSiswa />} />
+              <Route path="unit/kehadiran-guru" element={<DashboardUnitKehadiranGuru />} />
               <Route path="unit/penggajian" element={<DashboardUnitPenggajian />} />
               <Route path="unit/arsip" element={<DashboardUnitArsip />} />
               

@@ -57,6 +57,7 @@ export function DashboardUnitInputAgenda() {
   const [fotoUrl, setFotoUrl] = useState<string>("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [statusKehadiranGuru, setStatusKehadiranGuru] = useState<string>("TEPAT_WAKTU");
+  const [alasanAdmin, setAlasanAdmin] = useState<string>("");
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
@@ -197,6 +198,7 @@ export function DashboardUnitInputAgenda() {
     setFotoUrl("");
     setSelectedFile(null);
     setStatusKehadiranGuru("TEPAT_WAKTU");
+    setAlasanAdmin("");
     setSubmitError("");
     setSubmitSuccess(false);
     
@@ -274,6 +276,11 @@ export function DashboardUnitInputAgenda() {
     e.preventDefault();
     if (!selectedTeacher || !selectedSchedule || !tanggal || !materi) {
       setSubmitError("Mohon lengkapi semua field yang wajib");
+      return;
+    }
+
+    if (!isGuru && !alasanAdmin.trim()) {
+      setSubmitError("Mohon tuliskan alasan admin mengisi agenda ini");
       return;
     }
 
@@ -400,6 +407,7 @@ export function DashboardUnitInputAgenda() {
         agendaPayload.diverifikasi_oleh = user!.id;
         agendaPayload.tanggal_verifikasi = new Date().toISOString();
         agendaPayload.status_kehadiran_guru = statusKehadiranGuru; 
+        agendaPayload.alasan_admin = alasanAdmin;
       }
 
       const { data: agendaData, error: agendaError } = await supabase
@@ -622,22 +630,33 @@ export function DashboardUnitInputAgenda() {
                 </div>
 
                 {!isGuru && (
-                  <div className="space-y-2">
-                    <Label>Status Kehadiran Guru</Label>
-                    <Select value={statusKehadiranGuru} onValueChange={setStatusKehadiranGuru}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Pilih status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="TEPAT_WAKTU">Tepat Waktu (Hadir)</SelectItem>
-                        <SelectItem value="TERLAMBAT">Terlambat</SelectItem>
-                        <SelectItem value="IZIN">Izin</SelectItem>
-                        <SelectItem value="IZIN_DINAS">Izin Dinas Khusus</SelectItem>
-                        <SelectItem value="SAKIT">Sakit</SelectItem>
-                        <SelectItem value="ALFA">Alfa / Tanpa Keterangan</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  <>
+                    <div className="space-y-2">
+                      <Label>Status Kehadiran Guru</Label>
+                      <Select value={statusKehadiranGuru} onValueChange={setStatusKehadiranGuru}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Pilih status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="TEPAT_WAKTU">Tepat Waktu (Hadir)</SelectItem>
+                          <SelectItem value="TERLAMBAT">Terlambat</SelectItem>
+                          <SelectItem value="IZIN">Izin</SelectItem>
+                          <SelectItem value="IZIN_DINAS">Izin Dinas Khusus</SelectItem>
+                          <SelectItem value="SAKIT">Sakit</SelectItem>
+                          <SelectItem value="ALFA">Alfa / Tanpa Keterangan</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Alasan Admin Mengisikan Agenda <span className="text-red-500">*</span></Label>
+                      <Input 
+                        placeholder="Contoh: Guru berhalangan mengisi sendiri, HP rusak, dll" 
+                        value={alasanAdmin} 
+                        onChange={(e) => setAlasanAdmin(e.target.value)} 
+                        required 
+                      />
+                    </div>
+                  </>
                 )}
               </div>
 

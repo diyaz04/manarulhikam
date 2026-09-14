@@ -127,6 +127,7 @@ export function DashboardUnitKehadiranSiswa() {
           .select(`
             student_id,
             status,
+            keterangan,
             agenda:agenda_mengajar!inner (
               tanggal,
               guru_id,
@@ -184,6 +185,7 @@ export function DashboardUnitKehadiranSiswa() {
           .select(`
             student_id,
             status,
+            keterangan,
             agenda:agenda_mengajar!inner (
               tanggal,
               jadwal:schedules!inner (
@@ -229,6 +231,7 @@ export function DashboardUnitKehadiranSiswa() {
                 ? `Jam ke-${agenda.jadwal.jam_ke_mulai}` 
                 : `Jam ke-${agenda.jadwal.jam_ke_mulai}-${agenda.jadwal.jam_ke_selesai}`,
               status: a.status,
+              keterangan: a.keterangan,
               jam_mulai: agenda.jadwal.jam_ke_mulai
             };
           }).sort((a, b) => a.jam_mulai - b.jam_mulai);
@@ -339,7 +342,8 @@ export function DashboardUnitKehadiranSiswa() {
         "NISN": s.nisn,
         "Nama Siswa / Santri": s.nama,
         "Rekomendasi Sistem": s.rekomendasi,
-        "Keputusan Admin": s.keputusanHarian
+        "Keputusan Admin": s.keputusanHarian,
+        "Keterangan Detail": s.detailJam.map((dj: any) => `${dj.mapel}: ${dj.status}${dj.keterangan ? ` (${dj.keterangan})` : ''}`).join(' | ')
       }));
     } else {
       formattedData = reportData.map((s, index) => ({
@@ -532,6 +536,11 @@ export function DashboardUnitKehadiranSiswa() {
                                         dj.status === 'SAKIT' ? 'text-orange-600' : 'text-red-600'
                                       }`}>{dj.status}</span>
                                     </div>
+                                    {dj.keterangan && (
+                                      <div className="mt-1 pt-1 border-t border-gray-200/60 text-gray-500 italic">
+                                        Catatan: {dj.keterangan}
+                                      </div>
+                                    )}
                                   </div>
                                 )) : <span className="text-xs text-gray-400 italic">Belum ada absen dari guru hari ini</span>}
                               </div>

@@ -27,10 +27,10 @@ export function DashboardUnitMonitoringAgenda() {
       const { data, error } = await supabase
         .from('agenda_mengajar')
         .select(`
-          id, tanggal, materi, foto_url, status, status_kehadiran_guru, created_at,
+          id, tanggal, materi, foto_url, status, status_kehadiran_guru, alasan_admin, created_at,
           guru:teachers!inner(nama),
           jadwal:schedules!inner(mata_pelajaran, kelas, jam_ke_mulai, jam_ke_selesai),
-          absensi:absensi_siswa(count)
+          absensi:absensi_siswa(status, keterangan, student:students(nama))
         `)
         .eq('lembaga_id', activeRole!.lembaga_id)
         .eq('tanggal', tanggalFilter)
@@ -160,6 +160,12 @@ export function DashboardUnitMonitoringAgenda() {
                                   <p className="text-sm text-gray-500 italic">Tidak ada foto</p>
                                 )}
                               </div>
+                              {agenda.alasan_admin && (
+                                <div className="p-3 bg-blue-50 border border-blue-100 rounded-lg">
+                                  <p className="text-xs font-semibold text-blue-900 mb-1">Catatan Admin (Penginput):</p>
+                                  <p className="text-xs text-blue-800">{agenda.alasan_admin}</p>
+                                </div>
+                              )}
                             </div>
                           </DialogContent>
                         </Dialog>
@@ -173,10 +179,58 @@ export function DashboardUnitMonitoringAgenda() {
                         </div>
                       </TableCell>
                       <TableCell className="text-center">
-                        <div className="flex flex-col items-center justify-center">
-                          <UserCheck className="w-4 h-4 text-blue-500 mb-1" />
-                          <span className="text-xs font-bold text-gray-700">{agenda.absensi[0]?.count || 0} Siswa</span>
-                        </div>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <div className="flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 p-2 rounded-lg transition-colors">
+                              <UserCheck className="w-4 h-4 text-blue-500 mb-1" />
+                              <span className="text-xs font-bold text-gray-700">{agenda.absensi?.length || 0} Siswa</span>
+                            </div>
+                          </DialogTrigger>
+                          <DialogContent className="sm:max-w-xl max-h-[80vh] flex flex-col">
+                            <DialogHeader>
+                              <DialogTitle>Detail Kehadiran Siswa</DialogTitle>
+                            </DialogHeader>
+                            <div className="overflow-y-auto flex-1 pr-2">
+                              {agenda.absensi && agenda.absensi.length > 0 ? (
+                                <Table>
+                                  <TableHeader>
+                                    <TableRow>
+                                      <TableHead className="w-10">No</TableHead>
+                                      <TableHead>Nama Siswa</TableHead>
+                                      <TableHead className="w-24 text-center">Status</TableHead>
+                                      <TableHead>Keterangan</TableHead>
+                                    </TableRow>
+                                  </TableHeader>
+                                  <TableBody>
+                                    {agenda.absensi.map((abs: any, idx: number) => (
+                                      <TableRow key={idx}>
+                                        <TableCell>{idx + 1}</TableCell>
+                                        <TableCell className="font-medium text-xs">{abs.student?.nama}</TableCell>
+                                        <TableCell className="text-center">
+                                          <Badge className={`${
+                                            abs.status === 'HADIR' ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100' :
+                                            abs.status === 'IZIN' ? 'bg-blue-100 text-blue-700 hover:bg-blue-100' :
+                                            abs.status === 'SAKIT' ? 'bg-orange-100 text-orange-700 hover:bg-orange-100' :
+                                            'bg-red-100 text-red-700 hover:bg-red-100'
+                                          } border-none text-[10px]`}>
+                                            {abs.status}
+                                          </Badge>
+                                        </TableCell>
+                                        <TableCell className="text-xs text-gray-600 italic">
+                                          {abs.keterangan || '-'}
+                                        </TableCell>
+                                      </TableRow>
+                                    ))}
+                                  </TableBody>
+                                </Table>
+                              ) : (
+                                <div className="text-center py-8 text-gray-500">
+                                  Belum ada data absensi siswa.
+                                </div>
+                              )}
+                            </div>
+                          </DialogContent>
+                        </Dialog>
                       </TableCell>
                     </TableRow>
                   ))}

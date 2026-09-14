@@ -281,6 +281,7 @@ export function DashboardLayout() {
           { name: "Verifikasi Kedatangan", href: "/dashboard/unit/verifikasi-kedatangan", icon: Camera, badge: pendingKedatanganCount },
           { name: "Verifikasi Absensi", href: "/dashboard/unit/absensi", icon: FileCheck2, badge: pendingCount },
           { name: "Kehadiran Siswa", href: "/dashboard/unit/kehadiran-siswa", icon: UserCheck },
+          { name: "Kehadiran Guru", href: "/dashboard/unit/kehadiran-guru", icon: Users },
           { name: "Hitung Gaji Guru", href: "/dashboard/unit/penggajian", icon: BadgeDollarSign },
           { name: "Arsip Dokumen", href: "/dashboard/unit/arsip", icon: FileText },
         ]

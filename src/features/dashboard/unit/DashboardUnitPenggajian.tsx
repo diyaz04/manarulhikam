@@ -8,7 +8,9 @@ import {
   Download,
   Loader2,
   Calendar,
-  CheckCircle2
+  CheckCircle2,
+  Plus,
+  Trash2
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -29,11 +31,17 @@ const MONTHS = [
   "Juli", "Agustus", "September", "Oktober", "November", "Desember"
 ];
 
+interface PayrollRate {
+  id?: string;
+  nama_rate: string;
+  rate_per_jam: number;
+}
+
 export function DashboardUnitPenggajian() {
   const { activeRole } = useAuth();
   
   // Payroll Config state
-  const [ratePerJam, setRatePerJam] = useState<number>(0);
+  const [rates, setRates] = useState<PayrollRate[]>([]);
   const [isSavingConfig, setIsSavingConfig] = useState(false);
   const [configSuccess, setConfigSuccess] = useState(false);
 
@@ -61,14 +69,17 @@ export function DashboardUnitPenggajian() {
   const fetchConfig = async () => {
     try {
       const { data, error } = await supabase
-        .from('payroll_config')
-        .select('rate_per_jam')
+        .from('payroll_rates')
+        .select('*')
         .eq('lembaga_id', activeRole!.lembaga_id)
-        .single();
+        .order('created_at', { ascending: true });
         
-      if (error && error.code !== 'PGRST116') throw error; // PGRST116 is not found (0 rows)
-      if (data) {
-        setRatePerJam(data.rate_per_jam || 0);
+      if (error) throw error;
+      if (data && data.length > 0) {
+        setRates(data);
+      } else {
+        // Default empty state if no rates exist
+        setRates([{ nama_rate: 'Tipe A', rate_per_jam: 25000 }]);
       }
     } catch (err) {
       console.error("Error fetching config:", err);
@@ -80,15 +91,34 @@ export function DashboardUnitPenggajian() {
     setIsSavingConfig(true);
     setConfigSuccess(false);
     try {
-      const { error } = await supabase
-        .from('payroll_config')
-        .upsert({
-          lembaga_id: activeRole!.lembaga_id,
-          rate_per_jam: ratePerJam,
-          updated_at: new Date().toISOString()
-        });
+      // Get all current rate IDs to see what was deleted
+      const { data: existingRates } = await supabase
+        .from('payroll_rates')
+        .select('id')
+        .eq('lembaga_id', activeRole!.lembaga_id);
+        
+      const existingIds = existingRates?.map(r => r.id) || [];
+      const currentIds = rates.map(r => r.id).filter(id => id) as string[];
+      const deletedIds = existingIds.filter(id => !currentIds.includes(id));
       
+      // Delete removed rates
+      if (deletedIds.length > 0) {
+        await supabase.from('payroll_rates').delete().in('id', deletedIds);
+      }
+      
+      // Upsert current rates
+      const payload = rates.map(r => ({
+        ...(r.id ? { id: r.id } : {}),
+        lembaga_id: activeRole!.lembaga_id,
+        nama_rate: r.nama_rate,
+        rate_per_jam: r.rate_per_jam,
+      }));
+      
+      const { error } = await supabase.from('payroll_rates').upsert(payload);
       if (error) throw error;
+      
+      await fetchConfig(); // refresh to get generated IDs
+      
       setConfigSuccess(true);
       setTimeout(() => setConfigSuccess(false), 3000);
     } catch (err: any) {
@@ -96,6 +126,22 @@ export function DashboardUnitPenggajian() {
     } finally {
       setIsSavingConfig(false);
     }
+  };
+
+  const addRate = () => {
+    setRates([...rates, { nama_rate: '', rate_per_jam: 0 }]);
+  };
+
+  const removeRate = (index: number) => {
+    const newRates = [...rates];
+    newRates.splice(index, 1);
+    setRates(newRates);
+  };
+
+  const updateRate = (index: number, field: keyof PayrollRate, value: any) => {
+    const newRates = [...rates];
+    newRates[index] = { ...newRates[index], [field]: value };
+    setRates(newRates);
   };
 
   const fetchPayrolls = async () => {
@@ -168,32 +214,60 @@ export function DashboardUnitPenggajian() {
                   <Settings className="w-5 h-5 text-emerald-600" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg">Tarif Honor</CardTitle>
-                  <CardDescription>Berlaku global untuk unit ini</CardDescription>
+                  <CardTitle className="text-lg">Tipe Tarif Honor</CardTitle>
+                  <CardDescription>Bisa dibuat lebih dari satu tipe</CardDescription>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="pt-6">
               <form onSubmit={saveConfig} className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Besaran Honor per Jam Pelajaran (Rp)</Label>
-                  <Input 
-                    type="number" 
-                    min="0"
-                    step="1000"
-                    placeholder="Contoh: 25000"
-                    value={ratePerJam}
-                    onChange={(e) => setRatePerJam(parseFloat(e.target.value) || 0)}
-                    required
-                  />
-                  <p className="text-xs text-gray-500">
-                    Nilai ini akan dikalikan otomatis setiap ada agenda mengajar yang disetujui.
-                  </p>
-                </div>
+                {rates.map((rate, index) => (
+                  <div key={index} className="space-y-2 p-3 bg-gray-50 border border-gray-100 rounded-xl relative">
+                    <div className="flex justify-between items-center mb-1">
+                      <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Tipe #{index + 1}</Label>
+                      {rates.length > 1 && (
+                        <button type="button" onClick={() => removeRate(index)} className="text-red-500 hover:text-red-700">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                    <div className="space-y-3">
+                      <Input 
+                        placeholder="Nama Tipe (Misal: Golongan A)"
+                        value={rate.nama_rate}
+                        onChange={(e) => updateRate(index, 'nama_rate', e.target.value)}
+                        required
+                        className="bg-white"
+                      />
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">Rp</span>
+                        <Input 
+                          type="number" 
+                          min="0"
+                          step="1000"
+                          placeholder="Besaran per JP"
+                          value={rate.rate_per_jam}
+                          onChange={(e) => updateRate(index, 'rate_per_jam', parseFloat(e.target.value) || 0)}
+                          required
+                          className="pl-9 bg-white"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                
+                <Button type="button" variant="outline" onClick={addRate} className="w-full border-dashed border-2 text-emerald-600 hover:bg-emerald-50">
+                  <Plus className="w-4 h-4 mr-2" /> Tambah Tipe Tarif
+                </Button>
+
+                <p className="text-[11px] text-gray-500 text-center px-2">
+                  Tipe tarif ini nantinya dapat dipilih untuk masing-masing guru di menu Data Guru.
+                </p>
+
                 <Button 
                   type="submit" 
                   disabled={isSavingConfig} 
-                  className="w-full bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-all"
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-all mt-4"
                 >
                   {isSavingConfig ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
                   Simpan Pengaturan
