@@ -101,16 +101,20 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- 9. ALUMNI
+-- 9. ALUMNI (tabel alumni tidak punya user_id, hanya admin lembaga yang boleh baca)
 DROP POLICY IF EXISTS "Public Read Alumni" ON public.alumni;
 CREATE POLICY "Strict Read Alumni" ON public.alumni FOR SELECT USING (
-    user_id = auth.uid() OR
     public.is_admin_of_lembaga(auth.uid(), lembaga_id)
 );
 
--- 10. SPMB PENDAFTAR
+-- 10. SPMB PENDAFTAR (spmb_pendaftar tidak punya lembaga_id/user_id; lembaga lewat spmb_config)
+-- Catatan: policy "Public can read spmb_pendaftar" sengaja belum dihapus karena form SPMB publik
+-- memakai insert(...).select() sebagai anon.
 DROP POLICY IF EXISTS "Auth users can read all" ON public.spmb_pendaftar;
 CREATE POLICY "Strict Read SPMB Pendaftar" ON public.spmb_pendaftar FOR SELECT USING (
-    user_id = auth.uid() OR
-    public.is_admin_of_lembaga(auth.uid(), lembaga_id)
+    EXISTS (
+        SELECT 1 FROM public.spmb_config c
+        WHERE c.id = spmb_pendaftar.config_id
+          AND public.is_admin_of_lembaga(auth.uid(), c.lembaga_id)
+    )
 );
