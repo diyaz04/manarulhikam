@@ -161,6 +161,7 @@ export function DashboardUnitPenggajian() {
         .select(`
           id,
           total_jam_terverifikasi,
+          rate_per_jam,
           total_honor,
           status,
           guru:teachers!guru_id (nama)
@@ -186,6 +187,7 @@ export function DashboardUnitPenggajian() {
       "No": index + 1,
       "Nama Guru / Ustadz": p.guru.nama,
       "Total Jam (Terverifikasi)": p.total_jam_terverifikasi,
+      "Tarif per JP": p.rate_per_jam ?? 0,
       "Total Honor": p.total_honor,
       "Status Pembayaran": p.status,
       "Bulan": MONTHS[selectedMonth - 1],
@@ -315,7 +317,7 @@ export function DashboardUnitPenggajian() {
                 </div>
                 <div>
                   <CardTitle className="text-lg">Rekapitulasi Honor</CardTitle>
-                  <CardDescription>Otomatis berdasarkan agenda terverifikasi</CardDescription>
+                  <CardDescription>Otomatis dari agenda terverifikasi. Jika tarif diubah di tengah bulan, honor bulan berjalan dihitung ulang dengan tarif terbaru.</CardDescription>
                 </div>
               </div>
 
@@ -353,6 +355,7 @@ export function DashboardUnitPenggajian() {
                       <TableRow>
                         <TableHead className="pl-6">Nama Guru / Ustadz</TableHead>
                         <TableHead className="text-center">Jam Hadir</TableHead>
+                        <TableHead className="text-right">Tarif / JP</TableHead>
                         <TableHead className="text-right">Total Honor</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -366,6 +369,9 @@ export function DashboardUnitPenggajian() {
                             <span className="inline-flex items-center justify-center bg-blue-50 text-blue-700 px-2.5 py-1 rounded-lg text-xs font-bold">
                               {payroll.total_jam_terverifikasi} JP
                             </span>
+                          </TableCell>
+                          <TableCell className="text-right text-gray-600">
+                            {payroll.rate_per_jam != null ? formatRupiah(payroll.rate_per_jam) : "-"}
                           </TableCell>
                           <TableCell className="text-right font-bold text-gray-900 pr-6">
                             {formatRupiah(payroll.total_honor)}
