@@ -91,13 +91,6 @@ export function DashboardUnitPenggajian() {
     setIsSavingConfig(true);
     setConfigSuccess(false);
 
-    const invalid = rates.find(r => !Number.isInteger(r.rate_per_jam) || r.rate_per_jam % 1000 !== 0);
-    if (invalid) {
-      alert(`Besaran honor "${invalid.nama_rate || 'tanpa nama'}" harus kelipatan Rp 1.000 (contoh: 25.000, bukan 25.500).`);
-      setIsSavingConfig(false);
-      return;
-    }
-
     try {
       // Get all current rate IDs to see what was deleted
       const { data: existingRates } = await supabase
@@ -252,7 +245,7 @@ export function DashboardUnitPenggajian() {
                         <Input 
                           type="number" 
                           min="0"
-                          step="1000"
+                          step="any"
                           placeholder="Besaran per JP"
                           value={rate.rate_per_jam}
                           onChange={(e) => updateRate(index, 'rate_per_jam', parseFloat(e.target.value) || 0)}
