@@ -44,17 +44,24 @@ export function PortalSiswaIndex() {
     try {
       setLoading(true);
       
-      const { data, error } = await supabase.rpc('get_portal_student', { search_query: searchQuery });
+      const { data, error } = await supabase.rpc('get_portal_student', { search_query: searchQuery.trim() });
       
-      if (error || !data) {
+      if (error) {
+        console.error('get_portal_student error:', error);
         setStudent(null);
-        alert("Siswa tidak ditemukan. Periksa kembali NISN atau NIK.");
+        alert('Gagal mengambil data: ' + error.message);
+        return;
+      }
+      if (!data) {
+        setStudent(null);
+        alert('Siswa tidak ditemukan. Periksa kembali NISN atau NIK.');
         return;
       }
 
-      setStudent(data.student as unknown as Student);
+      // RPC mengembalikan lembaga_nama (flat); UI memakai student.lembaga.nama
+      setStudent({ ...data.student, lembaga: { nama: data.student.lembaga_nama } } as Student);
       setBills(data.bills || []);
-      setPayments(data.payments || []);
+      setPayments((data.payments || []).map((p: any) => ({ ...p, bills: { jenis_tagihan_final: p.jenis_tagihan_final } })));
       
       // Fetch Rekening
       const { data: rekData } = await supabase.from('rekening_yayasan').select('*').eq('is_active', true);
