@@ -107,16 +107,24 @@ export function DashboardUnitPenggajian() {
         await supabase.from('payroll_rates').delete().in('id', deletedIds);
       }
       
-      // Upsert current rates
-      const payload = rates.map(r => ({
-        ...(r.id ? { id: r.id } : {}),
+      // Pisahkan tarif baru (tanpa id) dan tarif lama. Jika dicampur dalam satu upsert,
+      // baris tanpa id dikirim dengan id = null sehingga melanggar NOT NULL.
+      const toRow = (r: PayrollRate) => ({
         lembaga_id: activeRole!.lembaga_id,
         nama_rate: r.nama_rate,
         rate_per_jam: r.rate_per_jam,
-      }));
-      
-      const { error } = await supabase.from('payroll_rates').upsert(payload);
-      if (error) throw error;
+      });
+      const newRows = rates.filter(r => !r.id).map(toRow);
+      const existingRows = rates.filter(r => r.id).map(r => ({ id: r.id, ...toRow(r) }));
+
+      if (existingRows.length > 0) {
+        const { error } = await supabase.from('payroll_rates').upsert(existingRows);
+        if (error) throw error;
+      }
+      if (newRows.length > 0) {
+        const { error } = await supabase.from('payroll_rates').insert(newRows);
+        if (error) throw error;
+      }
       
       await fetchConfig(); // refresh to get generated IDs
       
