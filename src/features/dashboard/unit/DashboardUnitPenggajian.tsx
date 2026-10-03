@@ -90,6 +90,14 @@ export function DashboardUnitPenggajian() {
     e.preventDefault();
     setIsSavingConfig(true);
     setConfigSuccess(false);
+
+    const invalid = rates.find(r => !Number.isInteger(r.rate_per_jam) || r.rate_per_jam % 1000 !== 0);
+    if (invalid) {
+      alert(`Besaran honor "${invalid.nama_rate || 'tanpa nama'}" harus kelipatan Rp 1.000 (contoh: 25.000, bukan 25.500).`);
+      setIsSavingConfig(false);
+      return;
+    }
+
     try {
       // Get all current rate IDs to see what was deleted
       const { data: existingRates } = await supabase
