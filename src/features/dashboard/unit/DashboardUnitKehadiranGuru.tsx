@@ -1,10 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { 
   Download,
   Loader2,
   Calendar,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,6 +19,20 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import * as XLSX from "xlsx";
+
+interface DetailAbsen {
+  tanggal: string;
+  waktu_absen: string | null;
+  status: string;
+  keterangan: string | null;
+}
+
+const formatTanggal = (iso: string) =>
+  new Date(iso + "T00:00:00").toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+
+const formatJam = (waktu: string | null) => (waktu ? waktu.slice(0, 5) : "-");
+
+const pad = (n: number) => String(n).padStart(2, "0");
 
 const MONTHS = [
   "Januari", "Februari", "Maret", "April", "Mei", "Juni",
@@ -33,6 +49,14 @@ export function DashboardUnitKehadiranGuru() {
   // Data State
   const [reportData, setReportData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+
+  const toggleExpand = (id: string) =>
+    setExpanded(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
 
   useEffect(() => {
     if (activeRole?.lembaga_id) {
@@ -60,12 +84,15 @@ export function DashboardUnitKehadiranGuru() {
       }
       
       // 2. Get all verified attendance for the selected month
-      const startDate = new Date(selectedYear, selectedMonth - 1, 1).toISOString();
-      const endDate = new Date(selectedYear, selectedMonth, 0, 23, 59, 59).toISOString();
+      // Kolom tanggal bertipe DATE, jadi pakai string YYYY-MM-DD lokal (bukan ISO/UTC yang bisa bergeser sehari)
+      const lastDay = new Date(selectedYear, selectedMonth, 0).getDate();
+      const startDate = `${selectedYear}-${pad(selectedMonth)}-01`;
+      const endDate = `${selectedYear}-${pad(selectedMonth)}-${pad(lastDay)}`;
       
       const { data: absensiData, error: absensiError } = await supabase
         .from('absensi_kedatangan_guru')
-        .select('guru_id, status')
+        .select('guru_id, tanggal, waktu_absen, status, keterangan')
+        .order('tanggal', { ascending: true })
         .eq('lembaga_id', activeRole!.lembaga_id)
         .eq('status_verifikasi', 'VERIFIED')
         .gte('tanggal', startDate)
@@ -76,13 +103,14 @@ export function DashboardUnitKehadiranGuru() {
       // 3. Aggregate data
       const statsMap = new Map();
       teachersData.forEach(t => {
-        statsMap.set(t.id, { ...t, hadir: 0, izin: 0, sakit: 0, alfa: 0, total: 0 });
+        statsMap.set(t.id, { ...t, hadir: 0, izin: 0, sakit: 0, alfa: 0, total: 0, detail: [] as DetailAbsen[] });
       });
 
       (absensiData || []).forEach(abs => {
         const t = statsMap.get(abs.guru_id);
         if (t) {
           t.total += 1;
+          t.detail.push({ tanggal: abs.tanggal, waktu_absen: abs.waktu_absen, status: abs.status, keterangan: abs.keterangan });
           if (abs.status === 'HADIR') t.hadir += 1;
           else if (abs.status === 'IZIN') t.izin += 1;
           else if (abs.status === 'SAKIT') t.sakit += 1;
@@ -124,6 +152,21 @@ export function DashboardUnitKehadiranGuru() {
     const worksheet = XLSX.utils.json_to_sheet(formattedData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, `Rekap Guru`);
+
+    // Sheet rincian: satu baris per kehadiran (tanggal & jam datang)
+    const rincian = reportData.flatMap(t =>
+      (t.detail as DetailAbsen[]).map(d => ({
+        "Tanggal": d.tanggal,
+        "Hari": new Date(d.tanggal + "T00:00:00").toLocaleDateString("id-ID", { weekday: "long" }),
+        "NIP / ID": t.nip || "-",
+        "Nama Guru / Ustadz": t.nama,
+        "Jam Datang": formatJam(d.waktu_absen),
+        "Status": d.status,
+        "Keterangan": d.keterangan || "-",
+      }))
+    ).sort((a, b) => a.Tanggal.localeCompare(b.Tanggal) || a["Nama Guru / Ustadz"].localeCompare(b["Nama Guru / Ustadz"]));
+    const worksheetRincian = XLSX.utils.json_to_sheet(rincian.map((r, i) => ({ No: i + 1, ...r })));
+    XLSX.utils.book_append_sheet(workbook, worksheetRincian, `Rincian Kehadiran`);
     XLSX.writeFile(workbook, fileName);
   };
 
@@ -190,7 +233,7 @@ export function DashboardUnitKehadiranGuru() {
               <Table>
                 <TableHeader className="bg-white">
                   <TableRow>
-                    <TableHead className="pl-6 w-12 text-center">No</TableHead>
+                    <TableHead className="pl-6 w-16 text-center">No</TableHead>
                     <TableHead>Nama Guru / Ustadz</TableHead>
                     <TableHead>NIP / ID</TableHead>
                     <TableHead className="text-center">Total Hari (Terverifikasi)</TableHead>
@@ -203,8 +246,14 @@ export function DashboardUnitKehadiranGuru() {
                 </TableHeader>
                 <TableBody>
                   {reportData.map((t, index) => (
-                    <TableRow key={t.id} className="bg-white hover:bg-gray-50">
-                      <TableCell className="pl-6 text-center text-gray-500">{index + 1}</TableCell>
+                    <Fragment key={t.id}>
+                    <TableRow className="bg-white hover:bg-gray-50 cursor-pointer" onClick={() => toggleExpand(t.id)}>
+                      <TableCell className="pl-6 text-center text-gray-500">
+                        <span className="inline-flex items-center gap-1">
+                          {expanded.has(t.id) ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                          {index + 1}
+                        </span>
+                      </TableCell>
                       <TableCell className="font-bold text-emerald-900">{t.nama}</TableCell>
                       <TableCell className="text-gray-500 font-mono text-xs">{t.nip || '-'}</TableCell>
                       <TableCell className="text-center font-bold text-gray-700">{t.total}</TableCell>
@@ -221,6 +270,39 @@ export function DashboardUnitKehadiranGuru() {
                         </span>
                       </TableCell>
                     </TableRow>
+                    {expanded.has(t.id) && (
+                      <TableRow className="bg-gray-50/70 hover:bg-gray-50/70">
+                        <TableCell colSpan={9} className="px-6 py-4">
+                          {t.detail.length === 0 ? (
+                            <p className="text-sm text-gray-500">Belum ada kehadiran terverifikasi bulan ini.</p>
+                          ) : (
+                            <div className="overflow-x-auto rounded-xl border bg-white">
+                              <table className="w-full text-sm">
+                                <thead className="bg-gray-50 text-xs uppercase text-gray-500">
+                                  <tr>
+                                    <th className="px-4 py-2 text-left">Tanggal</th>
+                                    <th className="px-4 py-2 text-left">Jam Datang</th>
+                                    <th className="px-4 py-2 text-left">Status</th>
+                                    <th className="px-4 py-2 text-left">Keterangan</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {(t.detail as DetailAbsen[]).map(d => (
+                                    <tr key={d.tanggal} className="border-t">
+                                      <td className="px-4 py-2">{formatTanggal(d.tanggal)}</td>
+                                      <td className="px-4 py-2 font-mono">{formatJam(d.waktu_absen)}</td>
+                                      <td className="px-4 py-2 font-semibold">{d.status}</td>
+                                      <td className="px-4 py-2 text-gray-600">{d.keterangan || '-'}</td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    )}
+                    </Fragment>
                   ))}
                 </TableBody>
               </Table>
