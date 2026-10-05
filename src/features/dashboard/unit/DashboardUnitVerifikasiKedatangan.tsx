@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Search, Loader2, CheckCircle, XCircle, Camera, Check, X, FileText, Paperclip } from "lucide-react";
+import { Search, Loader2, CheckCircle, XCircle, Camera, Check, X, FileText, Paperclip, Eye } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 
@@ -150,9 +150,13 @@ export function DashboardUnitVerifikasiKedatangan() {
                           </Badge>
                           {a.keterangan && <p className="text-xs text-gray-500 max-w-[150px] truncate">{a.keterangan}</p>}
                           {(a.tugas_keterangan || a.tugas_file_url) && (
-                            <span className="inline-flex items-center gap-1 mt-1 text-[10px] font-bold bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded">
-                              <FileText className="w-3 h-3" /> Ada Tugas
-                            </span>
+                            <button
+                              type="button"
+                              onClick={() => { setSelectedAbsensi(a); setIsDialogOpen(true); }}
+                              className="inline-flex items-center gap-1 mt-1 text-[10px] font-bold bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded hover:bg-amber-200"
+                            >
+                              <FileText className="w-3 h-3" /> Lihat Tugas
+                            </button>
                           )}
                         </div>
                       </TableCell>
@@ -169,6 +173,14 @@ export function DashboardUnitVerifikasiKedatangan() {
                         )}
                       </TableCell>
                       <TableCell>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-8 px-2 mb-1 text-gray-600"
+                          onClick={() => { setSelectedAbsensi(a); setIsDialogOpen(true); }}
+                        >
+                          <Eye className="w-4 h-4 mr-1" /> Detail
+                        </Button>
                         {a.status_verifikasi === 'PENDING' ? (
                           <div className="flex gap-2">
                             <Button 
@@ -217,9 +229,11 @@ export function DashboardUnitVerifikasiKedatangan() {
           </DialogHeader>
           {selectedAbsensi && (
             <div className="p-6 space-y-6">
-              <div className="w-full aspect-[4/3] rounded-xl overflow-hidden bg-gray-100 border border-gray-200">
-                <img src={selectedAbsensi.foto_url} alt="Selfie Besar" className="w-full h-full object-contain" />
-              </div>
+              {selectedAbsensi.foto_url && (
+                <div className="w-full aspect-[4/3] rounded-xl overflow-hidden bg-gray-100 border border-gray-200">
+                  <img src={selectedAbsensi.foto_url} alt="Selfie Besar" className="w-full h-full object-contain" />
+                </div>
+              )}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-xs font-bold text-gray-500 uppercase">Status</p>
